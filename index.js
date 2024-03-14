@@ -28,7 +28,7 @@ function getPresignedUrls(key, expiresInSeconds = 86400) {
   return s3.getSignedUrlPromise('getObject', params);
 }
 
-app.get("/artworks",checkAPI, async (req, res) => {
+app.get("/api/artworks",checkAPI, async (req, res) => {
   try {
     const client = await pool.connect();
     const adminId = req.query.admin_id
