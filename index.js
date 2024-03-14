@@ -29,11 +29,10 @@ function getPresignedUrls(key, expiresInSeconds = 86400) {
   return s3.getSignedUrlPromise('getObject', params);
 }
 
-app.get("/api/artworks/get/all",checkAPI, async (req, res) => {
+app.get("/api/artwork/get/all",checkAPI, async (req, res) => {
   try {
     const client = await pool.connect();
     const adminId = req.query.admin_id
-    console.log(req.params)
     const result = await client.query(`
       SELECT 
         CAST(a.art_id AS INTEGER),
