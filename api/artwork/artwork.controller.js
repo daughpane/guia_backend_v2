@@ -1,6 +1,10 @@
 const { getAllArtworkByAdminIdService } = require("./artwork.service")
 const { getPresignedUrls } = require("../../utils/amazon")
 
+
+/*
+* TODO: Add more error handling
+ */
 const getAllArtworkByAdminIdController = async (req, res, client) => {
   try {
     const { admin_id } = req.query;

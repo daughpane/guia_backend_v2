@@ -1,7 +1,6 @@
-const { getPresignedUrls } = require("../../utils/amazon")
-const { pool } = require("../../config/database")
-
-
+/*
+* TODO: Add more error handling
+ */
 const getAllArtworkByAdminIdService = async (client, admin_id) => {
   const query = await client.query(`
       SELECT 
