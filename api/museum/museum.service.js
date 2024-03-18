@@ -1,4 +1,4 @@
-const getAllMuseumService = async (client, museum_id) => {
+const getMuseumService = async (client, museum_id) => {
     let query = `
     SELECT *
     FROM guia_db_museum`
@@ -13,5 +13,5 @@ const getAllMuseumService = async (client, museum_id) => {
 }
 
 module.exports = {
-    getAllMuseumService
+    getMuseumService
 }

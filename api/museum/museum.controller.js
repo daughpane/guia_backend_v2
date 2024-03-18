@@ -1,9 +1,9 @@
-const { getAllMuseumService } = require('./museum.service')
-const getAllMuseumController = async (req, res, client) => {
+const { getMuseumService } = require('./museum.service')
+const getMuseumController = async (req, res, client) => {
     try {
         const { museum_id } = req.query;
 
-        const result = await getAllMuseumService(client, museum_id)
+        const result = await getMuseumService(client, museum_id)
 
         res.send({museum: result.rows});
     } catch (err) {
@@ -13,5 +13,5 @@ const getAllMuseumController = async (req, res, client) => {
 }
 
 module.exports = {
-    getAllMuseumController
+    getMuseumController
 }
