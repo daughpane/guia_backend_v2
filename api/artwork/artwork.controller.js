@@ -1,9 +1,9 @@
-const { getAllArtworkByAdminIdService } = require("./artwork.service")
+const { getAllArtworkByAdminIdService, createArtworkService, createArtworkImageService } = require("./artwork.service")
 const { getPresignedUrls } = require("../../utils/amazon")
 
 
 /*
-* TODO: Add more error handling
+* TODO: create more error handling
  */
 const getAllArtworkByAdminIdController = async (req, res, client) => {
   try {
@@ -19,10 +19,51 @@ const getAllArtworkByAdminIdController = async (req, res, client) => {
     res.send({artworks: artworks});
   } catch (err) {
     console.error('Error executing query', err);
+    res.status(500).send(err);
+  }
+}
+
+// sort an object alphabetically by its keys
+const sortObject = (obj) => {
+  return Object.keys(obj).sort().reduce((result, key) => {
+    result[key] = obj[key];
+    return result;
+  }, {});
+}
+
+const createArtworkController = async (req, res, client) => {
+  try {
+    let artwork = req.body;
+
+    const images = artwork.images;
+    const thumbnail = artwork.thumbnail;
+
+    // modify artwork contents
+    delete artwork.images;
+    delete artwork.thumbnail;
+    artwork.date = new Date(); // for the added_on column
+
+    // sort keys alphabetically
+    artwork = sortObject(artwork);
+
+    const artworkResult = await createArtworkService(client, artwork);
+    const art_id = artworkResult.rows[0].art_id; // get the art_id from the result
+
+    const imageResult = await createArtworkImageService(client, images, thumbnail, art_id);
+
+    // if successful adding 10 images to table artworkimage, send success code
+    if(imageResult) {
+      res.send({ artwork: art_id });
+    } else {
+      throw new Error('Error adding all the images');
+    }
+  } catch(err) {
+    console.error('Error execution query', err);
     res.status(500).send('Error');
   }
 }
 
 module.exports = {
-  getAllArtworkByAdminIdController
+  getAllArtworkByAdminIdController,
+  createArtworkController
 }

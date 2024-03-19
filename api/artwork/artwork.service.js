@@ -34,6 +34,75 @@ const getAllArtworkByAdminIdService = async (client, admin_id) => {
   return query
 }
 
+/* Create Artwork Services */
+// get the last art_id
+const getArtID = async (client) => {
+  const query = await client.query(`
+    SELECT art_id FROM guia_db_artwork
+    ORDER BY art_id DESC
+    LIMIT 1;
+  `);
+
+  return query;
+}
+
+// add new row to guia_db_artwork
+const createArtworkService = async (client, artwork) => {
+  console.log(artwork);
+
+  // query for artwork table
+  let query = `INSERT INTO guia_db_artwork
+  VALUES (DEFAULT, $12, $3, $10, $5, $9, $8, `;
+
+  if(artwork.dimen_height_cm) {
+    query += `$7`;
+  } else {
+    query += `NULL`;
+  }
+
+  query += `, $6, `;
+
+  if(artwork.additional_info) {
+    query += `$2`;
+  } else {
+    query += `NULL`;
+  }
+
+  query += `, $4, NULL, false, $1, $11, NULL);`;
+  
+  await client.query(query, Object.values(artwork));
+
+  return await getArtID(client);
+}
+
+// add new row to guia_db_artworkimage
+const createArtworkImageService = async (client, images, thumbnail, art_id) => {
+  let i = 0;
+  for (; i < images.length; i++) {
+    
+    let query = `INSERT INTO guia_db_artworkimage
+    VALUES (DEFAULT, ' ', $1, `;
+
+    if(images[i] === thumbnail) {
+      query += `true, `;
+    } else {
+      query += `false, `;
+    }
+
+    query += `false, $2);`;
+
+    await client.query(query, [images[i], art_id]);
+  } 
+
+  if(i === images.length) {
+    return true;
+  } else {
+    return false;
+  } 
+}
+
 module.exports = {
-  getAllArtworkByAdminIdService
+  getAllArtworkByAdminIdService,
+  createArtworkService,
+  createArtworkImageService,
 }
