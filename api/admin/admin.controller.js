@@ -1,9 +1,16 @@
+const { verifyPassword } = require("../../utils/password")
+
+
+const { getAdminByUsername } = require("./admin.service")
 const adminLoginController = async (req, res, client) => {
   try {
-    res.send({status: "yeah"})
+    const { admin_username, admin_password } = req.body
+    var admin = await getAdminByUsername(client, admin_username)
+    var match = verifyPassword(admin_password, admin.password)
+    res.send({status: match})
   } catch (err) {
-    console.error('Error executing query', err);
-    res.status(500).send('Error');
+    console.log(err)
+    res.status(500).send(err);
   }
 }
 
