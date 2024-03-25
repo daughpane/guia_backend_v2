@@ -1,5 +1,6 @@
 const { getAllArtworkByAdminIdService, createArtworkService, createArtworkImageService } = require("./artwork.service")
 const { getPresignedUrls } = require("../../utils/amazon")
+const { sortObject } = require("../../utils/functions");
 
 
 /*
@@ -23,14 +24,6 @@ const getAllArtworkByAdminIdController = async (req, res, client) => {
   }
 }
 
-// sort an object alphabetically by its keys
-const sortObject = (obj) => {
-  return Object.keys(obj).sort().reduce((result, key) => {
-    result[key] = obj[key];
-    return result;
-  }, {});
-}
-
 const createArtworkController = async (req, res, client) => {
   try {
     let artwork = req.body;
@@ -46,8 +39,7 @@ const createArtworkController = async (req, res, client) => {
     // sort keys alphabetically
     artwork = sortObject(artwork);
 
-    const artworkResult = await createArtworkService(client, artwork);
-    const art_id = artworkResult.rows[0].art_id; // get the art_id from the result
+    const art_id = await createArtworkService(client, artwork);
 
     const imageResult = await createArtworkImageService(client, images, thumbnail, art_id);
 
