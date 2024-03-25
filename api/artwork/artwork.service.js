@@ -35,20 +35,9 @@ const getAllArtworkByAdminIdService = async (client, admin_id) => {
 }
 
 /* Create Artwork Services */
-// get the last art_id
-const getArtID = async (client) => {
-  const query = await client.query(`
-    SELECT art_id FROM guia_db_artwork
-    ORDER BY art_id DESC
-    LIMIT 1;
-  `);
-
-  return query;
-}
 
 // add new row to guia_db_artwork
 const createArtworkService = async (client, artwork) => {
-  console.log(artwork);
 
   // query for artwork table
   let query = `INSERT INTO guia_db_artwork
@@ -68,11 +57,10 @@ const createArtworkService = async (client, artwork) => {
     query += `NULL`;
   }
 
-  query += `, $4, NULL, false, $1, $11, NULL);`;
+  query += `, $4, NULL, false, $1, $11, NULL) RETURNING art_id;`;
   
-  await client.query(query, Object.values(artwork));
-
-  return await getArtID(client);
+  let result = await client.query(query, Object.values(artwork));
+  return result.rows[0].art_id;
 }
 
 // add new row to guia_db_artworkimage
