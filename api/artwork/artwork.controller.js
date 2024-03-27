@@ -23,6 +23,20 @@ const getAllArtworkByAdminIdController = async (req, res, client) => {
   }
 }
 
+const deleteArtworkController = async (req, res, client) => {
+  try {
+    const { artwork_id } = req.query;
+
+    const result = await deleteArtworkService(client, artwork_id);
+
+    res.send({result: result});
+  } catch (err) {
+    console.error('Error executing query', err);
+    res.status(500).send('Error');
+  }
+}
+
 module.exports = {
-  getAllArtworkByAdminIdController
+  getAllArtworkByAdminIdController,
+  deleteArtworkController
 }

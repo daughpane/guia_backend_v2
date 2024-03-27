@@ -34,6 +34,18 @@ const getAllArtworkByAdminIdService = async (client, admin_id) => {
   return query
 }
 
+const deleteArtworkService = async (client, artwork_id) => {
+  const query = await client.query(`
+    UPDATE guia_db_artwork
+    SET is_deleted = TRUE
+    WHERE art_id = $1
+    RETURNING *;
+  `, [artwork_id]);
+
+  return query
+}
+
 module.exports = {
-  getAllArtworkByAdminIdService
+  getAllArtworkByAdminIdService,
+  deleteArtworkService
 }
