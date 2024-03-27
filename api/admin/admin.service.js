@@ -6,7 +6,7 @@ const getAdminByUsername = async (client, admin_username) => {
     where users.username = $1;
   `
   let result =  await client.query(query, [admin_username])
-  return result.rows[0]
+  return result
 }
 
 
