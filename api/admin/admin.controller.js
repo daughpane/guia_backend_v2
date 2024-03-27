@@ -9,7 +9,8 @@ const adminLoginController = async (req, res, client) => {
     var admin = await getAdminByUsername(client, admin_username)
 
     if (admin.rowCount < 1) {
-      res.status(401).send({detail: "Admin does not exist"})
+      res.status(401).send({ detail: "Admin does not exist" })
+      return
     }
 
     admin = admin.rows[0]
