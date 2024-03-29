@@ -2,9 +2,9 @@
 * TODO: Add more error handling
  */
 const getAllArtworkByAdminIdService = async (client, admin_id) => {
-  const query = await client.query(`
-      SELECT 
-        CAST(a.art_id AS INTEGER),
+  var query = `
+      SELECT DISTINCT
+        CAST(a.art_id AS INTEGER) as art_id,
         a.title, 
         a.artist_name, 
         a.medium, 
@@ -25,13 +25,16 @@ const getAllArtworkByAdminIdService = async (client, admin_id) => {
       JOIN guia_db_section AS s ON a.section_id_id = s.section_id
       LEFT JOIN guia_db_admin AS ad ON ad.museum_id_id = s.museum_id_id
       LEFT JOIN guia_db_artworkimage AS ai ON a.art_id = ai.artwork_id
-      WHERE ad.user_id = $1
-      AND a.is_deleted = FALSE
+      WHERE a.is_deleted = FALSE
       AND ai.is_thumbnail = TRUE
-      ORDER BY a.art_id;
-    `, [admin_id]);
+    `
+  if (admin_id) {
+    query += ` AND ad.user_id = $1`
+  }
   
-  return query
+  query += ` ORDER BY art_id;`
+
+  return await client.query(query, admin_id ? [admin_id]: [])
 }
 
 const getArtworkByArtIdAdminIdService = async (client, art_id, admin_id) => {
