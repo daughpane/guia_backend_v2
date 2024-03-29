@@ -9,12 +9,11 @@ const {
   getArtworkByArtIdAdminIdController
 } = require("./artwork.controller")
 const {
-  getAllArtworkByAdminIdValidator,
   getArtworkByArtIdAdminIdValidator
 } = require("./artwork.validator")
 
 
-router.get("/get/all", getAllArtworkByAdminIdValidator, handleValidationErrors, connectDatabase(getAllArtworkByAdminIdController))
+router.get("/get/all", connectDatabase(getAllArtworkByAdminIdController))
 router.get("/get", getArtworkByArtIdAdminIdValidator, handleValidationErrors, connectDatabase(getArtworkByArtIdAdminIdController))
 
 module.exports = router;
