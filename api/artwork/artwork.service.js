@@ -93,8 +93,113 @@ const getArtworkImagesByArtIdService = async (client, art_id) => {
 }
 
 
+/* Create Artwork Services */
+
+// add new row to guia_db_artwork
+const createArtworkService = async (client, artwork) => {
+
+  // query for artwork table
+  let query = `INSERT INTO guia_db_artwork
+  VALUES (DEFAULT, $12, $3, $10, $5, $9, $8, `;
+
+  if(artwork.dimen_height_cm) {
+    query += `$7`;
+  } else {
+    query += `NULL`;
+  }
+
+  query += `, $6, `;
+
+  if(artwork.additional_info) {
+    query += `$2`;
+  } else {
+    query += `NULL`;
+  }
+
+  query += `, $4, NULL, false, $1, $11, NULL) RETURNING art_id;`;
+  
+  let result = await client.query(query, Object.values(artwork));
+  return result.rows[0].art_id;
+}
+
+// add new row to guia_db_artworkimage
+const createArtworkImageService = async (client, images, thumbnail, art_id) => {
+  let i = 0;
+  for (; i < images.length; i++) {
+    
+    let query = `INSERT INTO guia_db_artworkimage
+    VALUES (DEFAULT, ' ', $1, `;
+
+    if(images[i] === thumbnail) {
+      query += `true, `;
+    } else {
+      query += `false, `;
+    }
+
+    query += `false, $2);`;
+
+    await client.query(query, [images[i], art_id]);
+  } 
+
+  if(i === images.length) {
+    return true;
+  } else {
+    return false;
+  } 
+}
+
+/**
+ * 
+ * @param {*} client 
+ * @param {string} title 
+ * @param {string} artist_name 
+ * @param {int} section_id 
+ * @returns list of artwork with matching title, artist name, and section id
+ * @description Used for checking if there is artwork already exists
+ */
+const findDuplicateArtworkService = async (client, title, artist_name, section_id) => {
+  let query = `
+    SELECT artwork.art_id 
+    FROM guia_db_artwork as artwork
+    WHERE 
+        LOWER(artwork.title) = LOWER($1) 
+        AND LOWER(artwork.artist_name) = LOWER($2) 
+        AND artwork.is_deleted = FALSE 
+        AND artwork.section_id_id IN (
+            SELECT s.section_id 
+        FROM guia_db_section as s
+        INNER JOIN guia_db_section s2 ON s.museum_id_id = s2.museum_id_id
+        WHERE s2.section_id = $3
+        )
+  `
+  return client.query(query, [title, artist_name, section_id])   
+}
+
+/**
+ * @param {*} client 
+ * @param {*} admin_id 
+ * @description Returns sections that an admin has access to
+ */
+const findSectionWithAccessByUserId = async (client, admin_id) => {
+  let query = `
+    SELECT
+      admin.user_id,
+      section.section_id
+    FROM guia_db_admin AS admin
+    LEFT JOIN guia_db_section AS section
+      ON admin.museum_id_id = section.museum_id_id
+    WHERE admin.user_id = $1
+  `
+
+  return client.query(query, [admin_id])
+}
+
 module.exports = {
   getAllArtworkByAdminIdService,
   getArtworkByArtIdAdminIdService,
-  getArtworkImagesByArtIdService
+  getArtworkImagesByArtIdService,
+  createArtworkService,
+  createArtworkImageService,
+  findDuplicateArtworkService,
+  findSectionWithAccessByUserId
 }
