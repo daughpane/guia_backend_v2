@@ -1,7 +1,11 @@
 
 const getSectionService = async (client, museum_id_id, section_id) => {
     let query = `
-    SELECT * FROM guia_db_section
+    SELECT
+     section_id,
+     section_name,
+     museum_id_id as museum_id
+    FROM guia_db_section
     WHERE museum_id_id = $1`
 
     if (section_id) {
