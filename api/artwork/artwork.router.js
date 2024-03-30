@@ -1,5 +1,3 @@
-const { getAllArtworkByAdminIdController } = require("./artwork.controller")
-
 const express = require("express");
 const router = express.Router();
 
