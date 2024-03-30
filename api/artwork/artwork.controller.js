@@ -85,7 +85,6 @@ const createArtworkController = async (req, res, client) => {
     res.status(500).send('Error');
   }
 }
-
 module.exports = {
   getAllArtworkByAdminIdController,
   createArtworkController,
