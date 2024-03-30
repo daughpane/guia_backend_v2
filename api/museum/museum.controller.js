@@ -8,7 +8,7 @@ const getMuseumController = async (req, res, client) => {
         res.send({museum: result.rows});
     } catch (err) {
         console.error('Error executing query', err);
-        res.status(500).send('Error');
+        res.status(500).send({detail:"Internal server error."});
     }
 }
 
