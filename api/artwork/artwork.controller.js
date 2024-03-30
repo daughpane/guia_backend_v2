@@ -46,7 +46,6 @@ const getArtworkByArtIdAdminIdController = async(req, res, client) => {
     res.status(500).send({detail: "Internal server error."});
   }
 }
-
 module.exports = {
   getAllArtworkByAdminIdController,
   getArtworkByArtIdAdminIdController
