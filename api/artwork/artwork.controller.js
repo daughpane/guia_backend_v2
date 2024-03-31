@@ -78,11 +78,11 @@ const createArtworkController = async (req, res, client) => {
     if(imageResult) {
       res.send({ artwork: art_id });
     } else {
-      throw new Error('Error adding all the images');
+      res.status(400).send({detail: "Error creating artwork."})
     }
   } catch(err) {
-    console.error('Error execution query', err);
-    res.status(500).send('Error');
+    // console.error('Error execution query', err);
+    res.status(500).send({detail: "Internal server error."});
   }
 }
 module.exports = {
