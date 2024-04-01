@@ -1,5 +1,6 @@
 const { generateToken } = require("../../utils/token")
-const { getVisitorTokenService } = require("./visitor.service")
+const { getArtworksPerSectionIdService } = require("../artwork/artwork.service")
+const { getVisitorTokenService, getArtworkVisitsPerSectionIdService } = require("./visitor.service")
 
 const getVisitorTokenController = async (req, res, client) => {
   try {
@@ -33,6 +34,22 @@ const getVisitorTokenController = async (req, res, client) => {
   }
 }
 
+const getArtworkVisitsPerSectionIdController = async (req, res, client) => {
+  try {
+    const { section_id, visitor_token } = req.query
+
+    const result = await getArtworkVisitsPerSectionIdService(client, section_id, visitor_token)
+
+    const artworks = await getArtworksPerSectionIdService(client, section_id)
+
+    return res.status(200).send({ visits: result, artworks: artworks.length })
+  } catch(err) {
+    console.log(err)
+    return res.status(500).send({ detail: "Internal server error." })
+  }
+}
+
 module.exports = {
-  getVisitorTokenController
+  getVisitorTokenController,
+  getArtworkVisitsPerSectionIdController
 }
