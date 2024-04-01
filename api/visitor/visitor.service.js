@@ -24,10 +24,30 @@ const getArtworkVisitsPerSectionIdService = async (client, section_id, visitor_t
   `;
 
   const result = await client.query(visitQuery, [visitor_id, section_id]);
-  return result.rows.length;
+  return result.rowCount;
+}
+
+const validateSectionVisitedService = async (client, section_id, visitor_token) => {
+  let query = `
+    SELECT section_id
+    FROM guia_db_section section
+    LEFT JOIN guia_db_visitor visitor
+    ON section.museum_id_id = visitor.museum_id_id
+    WHERE visitor.visitor_token = $1
+    AND section.section_id = $2
+  `;
+
+  const result = await client.query(query, [visitor_token, section_id])
+
+  if(result.rowCount === 1 && result.rows[0].section_id === section_id) {
+    return true
+  } else {
+    return false
+  }
 }
 
 module.exports = {
   getVisitorTokenService,
-  getArtworkVisitsPerSectionIdService
+  getArtworkVisitsPerSectionIdService,
+  validateSectionVisitedService
 }
