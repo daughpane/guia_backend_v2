@@ -5,7 +5,9 @@ const {
   getArtworkByArtIdAdminIdService,
   getArtworkImagesByArtIdService,
   findDuplicateArtworkService,
-  findSectionWithAccessByUserId
+  findSectionWithAccessByUserId,
+  editArtworkService,
+  editArtworkImageService
 } = require("./artwork.service")
 const { getPresignedUrls } = require("../../utils/amazon")
 const { sortObject } = require("../../utils/functions");
@@ -90,26 +92,41 @@ const createArtworkController = async (req, res, client) => {
 
 const editArtworkController = async (req, res, client) => {
   try {
-    var { title, artist_name, section_id, updated_by } = req.body;
-    
-    var duplicate = await findDuplicateArtworkService(client, title, artist_name, section_id)
-    if (duplicate.rowCount > 0) {
+    let artwork = req.body;
+
+    //check if new images and thumbnail are provided
+    const { images, thumbnail } = artwork;
+
+    //need to improve the error handling
+    var duplicate = await findDuplicateArtworkService(client, artwork.title, artwork.artist_name, artwork.section_id)
+    // if(duplicate.rowCount == 1)
+    if(duplicate.rowCount === 1 && duplicate.rows[0] === artwork.art_id)
+      ;
+    else if (duplicate.rowCount > 0) {
       res.status(406).send({ detail: "Artwork with the same title and artist name already exists." })
       return
     }
 
-    var sections = await findSectionWithAccessByUserId(client, updated_by)
-    if (!sections.rows.some(section => section.section_id == section_id)) {
+    var sections = await findSectionWithAccessByUserId(client, artwork.updated_by)
+    if (!sections.rows.some(section => section.section_id == artwork.section_id)) {
       res.status(403).send({ detail: "Admin not allowed to edit artwork in this section." })
       return
     }
     
-    res.status(200).send("yeah")
+    //update artwork details
+    const art_id = await editArtworkService(client, artwork);
+
+    //update artwork images
+    await editArtworkImageService(client, images, thumbnail, art_id);
+
+    res.status(200).send({ success: true, art_id: art_id });
+
   } catch(err) {
     console.error('Error execution query', err);
     res.status(500).send({detail: "Internal server error."});
   }
 }
+
 module.exports = {
   getAllArtworkByAdminIdController,
   createArtworkController,

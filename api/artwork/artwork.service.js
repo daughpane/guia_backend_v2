@@ -194,6 +194,77 @@ const findSectionWithAccessByUserId = async (client, admin_id) => {
   return client.query(query, [admin_id])
 }
 
+/* Edit Artwork Services */
+const editArtworkService = async (client, artwork) => {
+  let query = `
+    UPDATE guia_db_artwork
+    SET 
+      title = $1,
+      artist_name = $2,
+      medium = $3,
+      date_published = $4,
+      dimen_width_cm = $5,
+      dimen_height_cm = $6,
+      dimen_length_cm = $7,
+      description = $8,
+      additional_info = $9,
+      updated_on = $10,
+      section_id_id = $11
+    WHERE 
+      art_id = $12
+    RETURNING art_id;
+  `;
+
+  let result = await client.query(query, [
+    artwork.title,
+    artwork.artist_name,
+    artwork.medium,
+    artwork.date_published,
+    artwork.dimen_width_cm,
+    artwork.dimen_height_cm || null,
+    artwork.dimen_length_cm,
+    artwork.description,
+    artwork.additional_info,
+    new Date(),
+    artwork.section_id,
+    artwork.art_id
+  ]);
+
+  return result.rows[0].art_id;
+}
+
+const editArtworkImageService = async(client, images, thumbnail, art_id) => {
+  //check if there are new images to replace the current ones
+  if(images.length > 0){
+    //if there are, delete the existing images
+    await client.query(
+      `DELETE FROM guia_db_artworkimage
+       WHERE artwork_id = $1`,
+      [art_id]
+    );
+
+    //insert the new images
+    for (let i = 0; i < images.length; i++){
+      await client.query(
+        `INSERT INTO guia_db_artworkimage
+         VALUES (DEFAULT, ' ', $1, $2, false, $3)`,
+         [images[i], images[i] === thumbnail, art_id]
+      );
+    }
+  } else {
+    //if no new images and there is a need to update the thumbnail among the images
+    await client.query(
+      `UPDATE guia_db_artworkimage
+       SET is_thumbnail = CASE WHEN image_link = $1 THEN true ELSE false END
+       WHERE art_id = $2`,
+      [thumbnail, art_id]
+    );
+  }
+
+  return true;
+}
+
+
 module.exports = {
   getAllArtworkByAdminIdService,
   getArtworkByArtIdAdminIdService,
@@ -201,5 +272,7 @@ module.exports = {
   createArtworkService,
   createArtworkImageService,
   findDuplicateArtworkService,
-  findSectionWithAccessByUserId
+  findSectionWithAccessByUserId,
+  editArtworkService,
+  editArtworkImageService
 }
