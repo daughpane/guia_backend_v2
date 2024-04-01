@@ -2,11 +2,11 @@ const {getDashboardService } = require("./dashboard.service")
 
 const getDashboardController = async (req, res, client) => {
     try{
-        const { is_deleted, museum_id } = req.query;
+        const { admin_id } = req.query;
 
-        const result = await getDashboardService(client, is_deleted, museum_id)
+        const result = await getDashboardService(client, admin_id)
 
-        res.send({dashboard: result.rows});
+        res.send({dashboard: result});
 
     }catch (err) {
         console.error('Internal Server Error', err);
