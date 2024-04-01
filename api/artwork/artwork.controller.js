@@ -5,7 +5,9 @@ const {
   getArtworkByArtIdAdminIdService,
   getArtworkImagesByArtIdService,
   findDuplicateArtworkService,
-  findSectionWithAccessByUserId
+  findSectionWithAccessByUserId,
+  deleteArtworkService,
+  deleteArtworkImageService
 } = require("./artwork.service")
 const { getPresignedUrls } = require("../../utils/amazon")
 const { sortObject } = require("../../utils/functions");
@@ -90,14 +92,25 @@ const createArtworkController = async (req, res, client) => {
 
 const deleteArtworkController = async (req, res, client) => {
   try {
-    const { artwork_id } = req.query;
+    const { art_id } = req.body;
+    
+    if (!art_id) {
+      return res.status(400).send({detail:"Artwork ID is required."})
+    }
 
-    const result = await deleteArtworkService(client, artwork_id);
+    const artwork = await getArtworkByArtIdAdminIdService(client, art_id)
 
-    res.send({result: result});
+    if (artwork.rowCount < 1) {
+      return res.status(400).send({detail: "Artwork does not exist."})
+    } 
+
+    const result = await deleteArtworkService(client, art_id);
+    const image = await deleteArtworkImageService(client, art_id);
+
+    return res.status(200).send({message: "Artwork deleted successfully."});
   } catch (err) {
     console.error('Error executing query', err);
-    res.status(500).send('Error');
+    return res.status(500).send({detail: "Internal server error."});
   }
 }
 
