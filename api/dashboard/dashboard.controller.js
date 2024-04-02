@@ -5,10 +5,6 @@ const {
     getDashboardMostCrowdedSectionsByAdminIdService
 } = require("./dashboard.service")
 
-const getDashboardTotalArtworksCountByAdminIdController = async (req, res, client) => {
-
-}
-
 const getDashboardController = async (req, res, client) => {
     try{
         const { admin_id } = req.query;
@@ -17,19 +13,16 @@ const getDashboardController = async (req, res, client) => {
         const visitorsLast24H = await getDashboardVisitorsLast24HByAdminIdService(client, admin_id);
         const mostVisitedArtworks = await getDashboardMostVisitedArtworksByAdminIdService(client, admin_id);
         const mostCrowdedSections = await getDashboardMostCrowdedSectionsByAdminIdService(client, admin_id);
-        // console.log(visitorsLast24H)
-        // console.log(mostVisitedArtworks)
-        // console.log(mostCrowdedSections)
 
         const result = {
-            total_artworks: totalArtworks.rows.length > 0 ? totalArtworks.rows[0].total_artworks : "0",
-            total_visitors_last24H: visitorsLast24H.rows.length > 0 && visitorsLast24H.rows[0].total_visitors_last24H
-                ? visitorsLast24H.rows[0].total_visitors_last24H
+            artworks_count: totalArtworks.rows.length > 0 ? totalArtworks.rows[0].artworks_count : "0",
+            visitors_count: visitorsLast24H.rows.length > 0 && visitorsLast24H.rows[0].visitors_count
+                ? visitorsLast24H.rows[0].visitors_count
                 : "0",
-            most_visited_artworks: mostVisitedArtworks.rows.length > 0
+            popular_artworks: mostVisitedArtworks.rows.length > 0
                 ? mostVisitedArtworks.rows.map(row => row.art_id_id)
                 : "0",
-            most_crowded_section: mostCrowdedSections.rows.length > 0
+            popular_sections: mostCrowdedSections.rows.length > 0
                 ? mostCrowdedSections.rows.map(row => row.section_id)
                 : "0"
         };
