@@ -26,7 +26,7 @@ const getVisitorTokenController = async (req, res, client) => {
 
     const saveToken = await getVisitorTokenService(client, token, museum_id)
 
-    return res.status(500).send({visitor_token: token})
+    return res.status(200).send({visitor_token: token})
   }
   catch (err) {
     console.log(err)
