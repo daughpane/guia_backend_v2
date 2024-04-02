@@ -4,7 +4,7 @@ const { getVisitorTokenService, getArtworkVisitsPerSectionIdService, validateSec
 
 const getVisitorTokenController = async (req, res, client) => {
   try {
-    const { museum_id } = req.body 
+    const { museum_id } = req.query 
 
     if (!museum_id) {
       return res.status(400).send({ detail: "Museum ID is required."})
