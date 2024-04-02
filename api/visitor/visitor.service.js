@@ -46,8 +46,28 @@ const validateSectionVisitedService = async (client, section_id, visitor_token) 
   }
 }
 
+const getTrafficPerMuseumIdService = async (client, museum_id) => {
+  let query = `
+    SELECT 
+        section.section_id,
+        COALESCE(COUNT(visits.visit_id), 0) AS total_visits
+    FROM 
+        guia_db_section section 
+    LEFT JOIN
+        guia_db_artwork artwork ON artwork.section_id_id = section.section_id
+    LEFT JOIN 
+        (SELECT * FROM guia_db_artworkvisits WHERE DATE(art_visited_on) = CURRENT_DATE) visits 
+        ON visits.art_id_id = artwork.art_id 
+    WHERE 
+        section.museum_id_id = $1
+    GROUP BY
+        section.section_id;
+  `
+  return await client.query(query, [museum_id])
+}
 module.exports = {
   getVisitorTokenService,
   getArtworkVisitsPerSectionIdService,
-  validateSectionVisitedService
+  validateSectionVisitedService,
+  getTrafficPerMuseumIdService
 }

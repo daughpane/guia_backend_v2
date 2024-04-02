@@ -1,6 +1,6 @@
 const { generateToken } = require("../../utils/token")
 const { getArtworksPerSectionIdService } = require("../artwork/artwork.service")
-const { getVisitorTokenService, getArtworkVisitsPerSectionIdService, validateSectionVisitedService } = require("./visitor.service")
+const { getVisitorTokenService, getArtworkVisitsPerSectionIdService, validateSectionVisitedService, getTrafficPerMuseumIdService } = require("./visitor.service")
 
 const getVisitorTokenController = async (req, res, client) => {
   try {
@@ -57,7 +57,21 @@ const getArtworkVisitsPerSectionIdController = async (req, res, client) => {
   }
 }
 
+const getTrafficPerMuseumIdController = async (req, res, client) => {
+  try {
+    const { museum_id } = req.query
+    if (!museum_id) {
+      return res.status(400).send({detail: "Museum ID is required."})
+    }
+    const results = await getTrafficPerMuseumIdService(client, museum_id)
+    return res.status(200).send({traffic:results.rows})
+  } catch(err) {
+    console.error(err)
+    return res.status(500).send({ detail: "Internal server error." })
+  }
+}
 module.exports = {
   getVisitorTokenController,
-  getArtworkVisitsPerSectionIdController
+  getArtworkVisitsPerSectionIdController,
+  getTrafficPerMuseumIdController
 }
