@@ -5,15 +5,15 @@ const getSectionController = async (req, res, client) => {
         const { museum_id, section_id } = req.query;
         
         if (!museum_id) {
-            res.status(400).send({detail:"Museum ID is required."})
+            return res.status(400).send({detail:"Museum ID is required."})
         }
 
         const result = await getSectionService(client, museum_id, section_id)
 
-        res.send({section: result.rows});
+        return res.status(200).send({section: result.rows});
     }catch (err) {
         console.error('Internal Server Error', err);
-        res.status(500).send({detail: "Internal Server Error"});    
+        return res.status(500).send({detail: "Internal Server Error"});    
     }
 }
 

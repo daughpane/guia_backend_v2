@@ -9,7 +9,7 @@ const adminLoginController = async (req, res, client) => {
     var admin = await getAdminByUsername(client, admin_username)
 
     if (admin.rowCount < 1) {
-      res.status(401).send({ detail: "Admin does not exist" })
+      return res.status(401).send({ detail: "Admin does not exist" })
       return
     }
 
@@ -18,7 +18,7 @@ const adminLoginController = async (req, res, client) => {
     var match = verifyPassword(admin_password, admin.password)
     
     if (!match) {
-      res.status(401).send({detail: "Invalid login credentials."})
+      return res.status(401).send({detail: "Invalid login credentials."})
     }
 
     var adminInfo = {
@@ -32,16 +32,16 @@ const adminLoginController = async (req, res, client) => {
     try {
       adminInfo.token_expires = getTokenExpiry(token)
     } catch (err) {
-      res.status(500).send({
+      return res.status(500).send({
         detail: "Internal server error.",
         dev_message: err
       });
     }
 
-    res.send(adminInfo)
+    return res.status(200).send(adminInfo)
   } catch (err) {
     console.log(err)
-    res.status(500).send({
+    return res.status(500).send({
       detail: "Internal server error.",
       dev_message: "Query error."
     });

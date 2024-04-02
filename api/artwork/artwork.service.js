@@ -205,6 +205,28 @@ const findSectionWithAccessByUserId = async (client, admin_id) => {
   return client.query(query, [admin_id])
 }
 
+const deleteArtworkService = async (client, art_id) => {
+  //art_id if artwork
+  const query = await client.query(`
+    UPDATE guia_db_artwork
+    SET is_deleted = TRUE
+    WHERE art_id = $1
+  `, [art_id]);
+
+  return query
+}
+
+const deleteArtworkImageService = async (client, art_id) => {
+  //artwork_id if artworkimage
+  const query = await client.query(`
+    UPDATE guia_db_artworkimage
+    SET is_deleted = TRUE
+    WHERE artwork_id = $1 AND is_deleted = FALSE
+  `, [art_id]);
+
+  return query
+}
+
 module.exports = {
   getAllArtworkByAdminIdService,
   getArtworkByArtIdAdminIdService,
@@ -213,5 +235,7 @@ module.exports = {
   createArtworkService,
   createArtworkImageService,
   findDuplicateArtworkService,
-  findSectionWithAccessByUserId
+  findSectionWithAccessByUserId,
+  deleteArtworkService,
+  deleteArtworkImageService
 }
