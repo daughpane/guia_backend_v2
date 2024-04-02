@@ -5,10 +5,10 @@ const getMuseumController = async (req, res, client) => {
 
         const result = await getMuseumService(client, museum_id)
 
-        res.send({museum: result.rows});
+        return res.status(200).send({museum: result.rows});
     } catch (err) {
         console.error('Error executing query', err);
-        res.status(500).send({detail:"Internal server error."});
+        return res.status(500).send({detail:"Internal server error."});
     }
 }
 
