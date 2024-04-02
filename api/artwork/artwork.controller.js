@@ -63,6 +63,20 @@ const createArtworkController = async (req, res, client) => {
   try {
     let artwork = req.body;
 
+    // error handling
+    var duplicate = await findDuplicateArtworkService(client, artwork.title, artwork.artist_name, artwork.section_id)
+    if (duplicate.rowCount > 0) {
+      res.status(406).send({ detail: "Artwork with the same title and artist name already exists." })
+      return
+    }
+
+    var sections = await findSectionWithAccessByUserId(client, artwork.added_by)
+    if (!sections.rows.some(section => section.section_id == artwork.section_id)) {
+      res.status(403).send({ detail: "Admin not allowed to edit artwork in this section." })
+      return
+    }
+
+    // isolate thumbnail and images
     const images = artwork.images;
     const thumbnail = artwork.thumbnail;
 
@@ -80,13 +94,13 @@ const createArtworkController = async (req, res, client) => {
 
     // if successful adding 10 images to table artworkimage, send success code
     if(imageResult) {
-      res.send({ artwork: art_id });
+      res.status(200).send({ artwork_id: art_id });
     } else {
-      throw new Error('Error adding all the images');
+      res.status(400).send({ detail: "Error creating artwork." })
     }
   } catch(err) {
-    console.error('Error execution query', err);
-    res.status(500).send('Error');
+    // console.error('Error execution query', err);
+    res.status(500).send({ detail: "Internal server error." });
   }
 }
 
