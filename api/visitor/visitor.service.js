@@ -65,9 +65,34 @@ const getTrafficPerMuseumIdService = async (client, museum_id) => {
   `
   return await client.query(query, [museum_id])
 }
+const getArtworkChecklistPerVisitorService = async (client, visitor_token, section_id) => {
+  let query = `
+  SELECT 
+    artwork.art_id,
+    artwork.title,
+    artwork.artist_name,
+    artwork.date_published,
+    CASE 
+          WHEN visitor.visitor_token IS NOT NULL THEN true
+          ELSE false
+      END AS is_visited
+  FROM guia_db_artwork artwork
+  LEFT JOIN
+    (SELECT * FROM guia_db_artworkvisits WHERE DATE(art_visited_on) = CURRENT_DATE) visits 
+    ON visits.art_id_id = artwork.art_id
+  LEFT JOIN
+    (SELECT * FROM guia_db_visitor WHERE visitor_token = $1) visitor 
+    ON visitor.visitor_id = visits.visitor_id_id 
+  WHERE 
+    artwork.section_id_id = $2
+  ORDER BY art_id asc
+  `
+  return await client.query(query, [visitor_token, section_id])
+}
 module.exports = {
   getVisitorTokenService,
   getArtworkVisitsPerSectionIdService,
   validateSectionVisitedService,
-  getTrafficPerMuseumIdService
+  getTrafficPerMuseumIdService,
+  getArtworkChecklistPerVisitorService
 }
