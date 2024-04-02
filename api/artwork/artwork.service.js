@@ -71,6 +71,17 @@ const getArtworkByArtIdAdminIdService = async (client, art_id, admin_id) => {
   return await client.query(query, admin_id ? [art_id, admin_id] : [art_id]);
 }
 
+const getArtworksPerSectionIdService = async (client, section_id) => {
+  var query = `
+    SELECT *
+    FROM guia_db_artwork
+    WHERE section_id_id = $1
+  `;
+
+  const result = await client.query(query, [section_id]);
+  return result.rows;
+}
+
 /**
  * 
  * @param {*} client 
@@ -219,6 +230,7 @@ const deleteArtworkImageService = async (client, art_id) => {
 module.exports = {
   getAllArtworkByAdminIdService,
   getArtworkByArtIdAdminIdService,
+  getArtworksPerSectionIdService,
   getArtworkImagesByArtIdService,
   createArtworkService,
   createArtworkImageService,
