@@ -7,7 +7,8 @@ const {
   findDuplicateArtworkService,
   findSectionWithAccessByUserId,
   editArtworkService,
-  editArtworkImageService
+  editArtworkImageService,
+  getImageIDService
 } = require("./artwork.service")
 const { getPresignedUrls } = require("../../utils/amazon")
 const { sortObject } = require("../../utils/functions");
@@ -97,14 +98,18 @@ const editArtworkController = async (req, res, client) => {
     //check if new images and thumbnail are provided
     const { images, thumbnail } = artwork;
 
-    //need to improve the error handling
-    var duplicate = await findDuplicateArtworkService(client, artwork.title, artwork.artist_name, artwork.section_id)
-    // if(duplicate.rowCount == 1)
-    if(duplicate.rowCount === 1 && duplicate.rows[0] === artwork.art_id)
-      ;
-    else if (duplicate.rowCount > 0) {
-      res.status(406).send({ detail: "Artwork with the same title and artist name already exists." })
-      return
+    var duplicate = await findDuplicateArtworkService(client, artwork.title, artwork.artist_name, artwork.section_id)    
+    let duplicateExists = false;
+    for (let row of duplicate.rows) {
+      if (row.art_id !== artwork.art_id) {
+        duplicateExists = true;
+        break;
+      }
+    }
+
+    if (duplicate.rowCount > 0 && duplicateExists) {
+      res.status(406).send({ detail: "Artwork with the same title and artist name already exists." });
+      return;
     }
 
     var sections = await findSectionWithAccessByUserId(client, artwork.updated_by)
@@ -117,9 +122,13 @@ const editArtworkController = async (req, res, client) => {
     const art_id = await editArtworkService(client, artwork);
 
     //update artwork images
-    await editArtworkImageService(client, images, thumbnail, art_id);
+    const imageIDs = await getImageIDService(client, art_id);
 
-    res.status(200).send({ success: true, art_id: art_id });
+    imageIDs.map(async (id, idx) => {
+      const result = await editArtworkImageService(client, images[idx], thumbnail, id.id)
+    })
+
+    return res.status(201).send({message: "Artwork edited successfully."})
 
   } catch(err) {
     console.error('Error execution query', err);

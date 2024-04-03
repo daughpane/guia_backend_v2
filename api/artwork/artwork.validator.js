@@ -11,6 +11,9 @@ const getArtworkByArtIdAdminIdValidator = [
 ]
 
 const editArtworkValidator = [
+  body('art_id')
+    .trim().notEmpty().withMessage('Art ID is required.')
+    .isInt({ min: 1 }).withMessage('Art ID is invalid.'),
   body('section_id')
     .trim().notEmpty().withMessage('Section ID is required.')
     .isInt({ min: 1 }).withMessage('Section ID is invalid.'),
@@ -36,7 +39,8 @@ const editArtworkValidator = [
   body('additional_info')
     .optional({ nullable: true }),
   body('updated_by')
-    .isInt({ min: 1 }).withMessage('Updated by is required.'),
+    .trim().notEmpty().withMessage('Updated by is required.')
+    .isInt({ min: 1 }).withMessage('Updated by is invalid.'),
   body('images')
     .isArray().custom(validateImagesLength).withMessage('10 artwork images are required.'),
   body('thumbnail')

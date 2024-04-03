@@ -208,7 +208,7 @@ const editArtworkService = async (client, artwork) => {
       dimen_length_cm = $7,
       description = $8,
       additional_info = $9,
-      updated_on = $10,
+      updated_by_id = $10,
       section_id_id = $11
     WHERE 
       art_id = $12
@@ -225,41 +225,41 @@ const editArtworkService = async (client, artwork) => {
     artwork.dimen_length_cm,
     artwork.description,
     artwork.additional_info,
-    new Date(),
+    artwork.updated_by,
     artwork.section_id,
-    artwork.art_id
+    artwork.art_id,
   ]);
 
   return result.rows[0].art_id;
 }
 
-const editArtworkImageService = async(client, images, thumbnail, art_id) => {
-  //check if there are new images to replace the current ones
-  if(images.length > 0){
-    //if there are, delete the existing images
-    await client.query(
-      `DELETE FROM guia_db_artworkimage
-       WHERE artwork_id = $1`,
-      [art_id]
-    );
+const getImageIDService = async(client, art_id) => {
+  let query = `
+    SELECT id FROM guia_db_artworkimage
+    WHERE
+      artwork_id = $1`;
 
-    //insert the new images
-    for (let i = 0; i < images.length; i++){
-      await client.query(
-        `INSERT INTO guia_db_artworkimage
-         VALUES (DEFAULT, ' ', $1, $2, false, $3)`,
-         [images[i], images[i] === thumbnail, art_id]
-      );
-    }
-  } else {
-    //if no new images and there is a need to update the thumbnail among the images
-    await client.query(
-      `UPDATE guia_db_artworkimage
-       SET is_thumbnail = CASE WHEN image_link = $1 THEN true ELSE false END
-       WHERE art_id = $2`,
-      [thumbnail, art_id]
-    );
-  }
+  const result = await client.query(query, [
+    art_id,
+  ]);
+
+  return result.rows;
+}
+
+const editArtworkImageService = async(client, image, thumbnail, id) => {
+  let query = `
+  UPDATE guia_db_artworkimage
+  SET
+    image_link = $1,
+    is_thumbnail = $2
+  WHERE
+    id = $3`;
+
+  await client.query(query, [
+    image,
+    thumbnail === image,
+    id,
+  ]);
 
   return true;
 }
@@ -274,5 +274,6 @@ module.exports = {
   findDuplicateArtworkService,
   findSectionWithAccessByUserId,
   editArtworkService,
-  editArtworkImageService
+  editArtworkImageService,
+  getImageIDService,
 }
