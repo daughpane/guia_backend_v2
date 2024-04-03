@@ -21,13 +21,13 @@ const getDashboardController = async (req, res, client) => {
                 : "0",
             popular_artworks: mostVisitedArtworks.rows.length > 0
                 ? mostVisitedArtworks.rows.map(row => row.art_id_id)
-                : "0",
+                : [],
             popular_sections: mostCrowdedSections.rows.length > 0
                 ? mostCrowdedSections.rows.map(row => row.section_id)
-                : "0"
+                : []
         };
 
-        res.send({dashboard: result});
+        return res.status(200).send({dashboard: result})
 
     }catch (err) {
         console.error('Internal Server Error', err);
