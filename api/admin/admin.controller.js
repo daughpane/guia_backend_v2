@@ -1,7 +1,6 @@
-const { verifyPassword, hashedPassword } = require("../../utils/password")
+const { verifyPassword, hashPassword } = require("../../utils/password")
 const { generateToken, getTokenExpiry } = require("../../utils/token")
 const { getAdminByUsername, getAdminById, adminChangePasswordService } = require("./admin.service")
-const crypto = require('crypto')
 
 const adminLoginController = async (req, res, client) => {
   try {
@@ -54,8 +53,6 @@ const adminChangePasswordController = async (req, res, client) => {
 
     var admin = await getAdminById(client, admin_id)
 
-    console.log(admin);
-
     if (admin.rowCount < 1) {
       return res.status(401).send({ detail: "User does not exist." })
     }
@@ -72,7 +69,7 @@ const adminChangePasswordController = async (req, res, client) => {
       return res.status(401).send({ detail: "Password has already been used." })
     }
 
-    const hash = hashedPassword(new_password);
+    const hash = hashPassword(new_password);
 
     const result = await adminChangePasswordService(client, admin.user_id, hash)
 
