@@ -17,6 +17,15 @@ const verifyPassword = (password, hashedPassword) => {
   return hash === savedHash;
 }
 
+const hashedPassword = (password) => {
+  const iterations = 320000
+  const salt = crypto.randomBytes(11).toString('hex')
+  const hash = crypto.pbkdf2Sync(password, salt, iterations, 32, 'sha256').toString("base64");
+
+  return "pbkdf2_sha256$" + iterations + "$" + salt + "$" + hash;
+}
+
 module.exports = {
-  verifyPassword
+  verifyPassword, 
+  hashedPassword
 }
