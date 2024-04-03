@@ -27,7 +27,7 @@ const getAllArtworkByAdminIdController = async (req, res, client) => {
       return { ...row, image_thumbnail: presignedUrl };
     }));
     
-    return send({artworks: artworks});
+    return res.status(200).send({artworks: artworks});
   } catch (err) {
     return res.status(500).send({detail: "Internal server error."});
   }
