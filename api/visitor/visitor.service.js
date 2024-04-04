@@ -72,27 +72,84 @@ const getArtworkChecklistPerVisitorService = async (client, visitor_token, secti
     artwork.title,
     artwork.artist_name,
     artwork.date_published,
-    CASE 
-          WHEN visitor.visitor_token IS NOT NULL THEN true
-          ELSE false
-      END AS is_visited
-  FROM guia_db_artwork artwork
+    visit_info.visit_id,
+    visit_info.visit_type,
+    visit_info.art_visited_on
+  FROM guia_db_artwork artwork 
   LEFT JOIN
-    (SELECT * FROM guia_db_artworkvisits WHERE DATE(art_visited_on) = CURRENT_DATE) visits 
-    ON visits.art_id_id = artwork.art_id
-  LEFT JOIN
-    (SELECT * FROM guia_db_visitor WHERE visitor_token = $1) visitor 
-    ON visitor.visitor_id = visits.visitor_id_id 
-  WHERE 
+    (
+      SELECT 
+        visits.visit_id,
+          visits.art_id_id,
+        visits.visit_type,
+        visits.is_deleted,
+        visits.art_visited_on 
+      FROM guia_db_artworkvisits visits
+      WHERE visits.visitor_id_id IN (
+        SELECT visitor_id  
+        FROM guia_db_visitor 
+        WHERE visitor_token = $1 
+      )
+      and DATE(visits.art_visited_on) = current_date 
+      and visits.is_deleted =  FALSE
+    ) visit_info
+    on visit_info.art_id_id = artwork.art_id 
+  WHERE
     artwork.section_id_id = $2
-  ORDER BY art_id asc
+    AND artwork.is_deleted = FALSE
+  ORDER BY artwork.art_id 
   `
   return await client.query(query, [visitor_token, section_id])
 }
+
+const addNewVisitService = async (client, visitor_id, art_id, visit_type) => {
+  let query = `
+  INSERT INTO
+    guia_db_artworkvisits (visit_type, art_id_id , visitor_id_id, art_visited_on, is_deleted)
+  VALUES ($1, $2, $3, NOW(), FALSE)
+   RETURNING visit_id
+  `
+  return await client.query(query, [visit_type, art_id, visitor_id])
+}
+
+const getVisitorIdByTokenService = async (client, visitor_token) => {
+  let query = `
+  SELECT *  
+  FROM guia_db_visitor visitor
+  WHERE visitor.visitor_token = $1
+  `
+  return await client.query(query, [visitor_token])
+}
+
+const checkDuplicateArtworkVisit = async (client, visitor_id, art_id) => {
+  let query = `
+  SELECT *
+  FROM guia_db_artworkvisits visits
+  WHERE visits.visitor_id_id = $1
+  AND DATE(visits.art_visited_on) = current_date 
+  AND visits.art_id_id = $2
+  `
+  return await client.query(query, [visitor_id, art_id])
+}
+
+const editVisitService = async (client, visit_id, is_deleted) => {
+  let query = `
+    UPDATE guia_db_artworkvisits
+    SET is_deleted = $2, updated_on = NOW()
+    WHERE visit_id = $1;
+  `
+  console.log(query, is_deleted)
+  return await client.query(query, [visit_id, is_deleted])
+}
+
 module.exports = {
   getVisitorTokenService,
   getArtworkVisitsPerSectionIdService,
   validateSectionVisitedService,
   getTrafficPerMuseumIdService,
-  getArtworkChecklistPerVisitorService
+  getArtworkChecklistPerVisitorService,
+  getVisitorIdByTokenService,
+  addNewVisitService,
+  checkDuplicateArtworkVisit,
+  editVisitService
 }
