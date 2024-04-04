@@ -20,6 +20,7 @@ const getArtworkVisitsPerSectionIdService = async (client, section_id, visitor_t
     ON artwork.art_id = visits.art_id_id
     WHERE visits.visitor_id_id = $1 
     AND artwork.section_id_id = $2
+    AND visits.is_visited = true
     GROUP BY artwork.art_id
   `;
 
