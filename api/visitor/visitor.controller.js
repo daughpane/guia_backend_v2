@@ -99,7 +99,7 @@ const getArtworkChecklistPerVisitorController = async (req, res, client) => {
 
 const editArtworkChecklistPerVisitorController = async (req, res, client) => {
   try {
-    const { art_id, is_checked, visitor_token, visit_id } = req.body
+    const { art_id, is_visited, visitor_token, visit_id } = req.body
 
     const visitor = await getVisitorIdByTokenService(client, visitor_token)
 
@@ -120,7 +120,7 @@ const editArtworkChecklistPerVisitorController = async (req, res, client) => {
         )
       }
 
-      const visit = await addNewVisitService(client, visitor_id, art_id, "manual")
+      const visit = await addNewVisitService(client, visitor_id, art_id, "manual", is_visited)
 
       if (visit.rowCount > 0) {
         return res.status(200).send({visit_id: visit.rows[0].visit_id, message:"Artwork checklist edited successfully."})
@@ -128,12 +128,12 @@ const editArtworkChecklistPerVisitorController = async (req, res, client) => {
 
       return res.status(500).send({ detail: "Error editing artwork checklist." })
     } else {
-      const editChecklist = await editVisitService(client, visit_id, is_checked != "true")
+      const editChecklist = await editVisitService(client, visit_id, is_visited)
 
       if (editChecklist.rowCount < 1) {
         return res.status(500).send({detail: "Error editing artwork checklist."})
       }
-      
+
       return res.status(200).send({message: "Artwork checklist edited successfully."})
     }
   } catch (err) {
