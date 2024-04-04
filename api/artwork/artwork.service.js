@@ -76,6 +76,7 @@ const getArtworksPerSectionIdService = async (client, section_id) => {
     SELECT *
     FROM guia_db_artwork
     WHERE section_id_id = $1
+    AND is_deleted = FALSE
   `;
 
   const result = await client.query(query, [section_id]);
