@@ -104,18 +104,17 @@ const editArtworkChecklistPerVisitorController = async (req, res, client) => {
     const visitor = await getVisitorIdByTokenService(client, visitor_token)
 
     if (visitor.rowCount < 1) {
-      return res.status(401).send("Visitor token not found.")
+      return res.status(401).send({detail:"Visitor token not found."})
     }
     
     const visitor_id = visitor.rows[0].visitor_id
     
     if (!visit_id) {
       const duplicateVisit = await checkDuplicateArtworkVisit(client, visitor_id, art_id)
-
       if (duplicateVisit.rowCount > 0) {
         return res.status(500).send(
           {
-          detail: "Error editing artwork checklist.",
+            detail: "Error editing artwork checklist.",
             dev_message: "Visit to this artwork already exists. Refresh to see the visit_id."
           }
         )
@@ -127,11 +126,14 @@ const editArtworkChecklistPerVisitorController = async (req, res, client) => {
         return res.status(200).send({visit_id: visit.rows[0].visit_id, message:"Artwork checklist edited successfully."})
       } 
 
-      return res.status(500).send(
-          { detail: "Error editing artwork checklist." }
-        )
+      return res.status(500).send({ detail: "Error editing artwork checklist." })
     } else {
-      const editChecklist = await editVisitService(client, visit_id, is_checked !="true")
+      const editChecklist = await editVisitService(client, visit_id, is_checked != "true")
+
+      if (editChecklist.rowCount < 1) {
+        return res.status(500).send({detail: "Error editing artwork checklist."})
+      }
+      
       return res.status(200).send({message: "Artwork checklist edited successfully."})
     }
   } catch (err) {
