@@ -138,7 +138,6 @@ const editVisitService = async (client, visit_id, is_deleted) => {
     SET is_deleted = $2, updated_on = NOW()
     WHERE visit_id = $1;
   `
-  console.log(query, is_deleted)
   return await client.query(query, [visit_id, is_deleted])
 }
 
