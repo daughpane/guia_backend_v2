@@ -14,9 +14,9 @@ const editArtworkChecklistPerVisitorValidator = [
     .isInt({ min: 1 }).withMessage('Art ID is invalid.'),
   body('visitor_token')
     .trim().notEmpty().withMessage('Visitor token is required.'),
-  body('is_checked')
-    .trim().notEmpty().withMessage('Visitor token is required.')
-    .isBoolean().withMessage('is_checked only accepts boolean value.'),
+  body('is_visited')
+    .trim().notEmpty().withMessage('is_visited is required.')
+    .isBoolean().withMessage('is_visited only accepts boolean value.'),
 ]
 
 module.exports = {

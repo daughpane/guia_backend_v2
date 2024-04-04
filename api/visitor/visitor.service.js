@@ -101,14 +101,14 @@ const getArtworkChecklistPerVisitorService = async (client, visitor_token, secti
   return await client.query(query, [visitor_token, section_id])
 }
 
-const addNewVisitService = async (client, visitor_id, art_id, visit_type) => {
+const addNewVisitService = async (client, visitor_id, art_id, visit_type, is_visited) => {
   let query = `
   INSERT INTO
-    guia_db_artworkvisits (visit_type, art_id_id , visitor_id_id, art_visited_on, is_deleted)
-  VALUES ($1, $2, $3, NOW(), FALSE)
+    guia_db_artworkvisits (visit_type, art_id_id , visitor_id_id, art_visited_on, is_visited)
+  VALUES ($1, $2, $3, NOW(), $4)
    RETURNING visit_id
   `
-  return await client.query(query, [visit_type, art_id, visitor_id])
+  return await client.query(query, [visit_type, art_id, visitor_id, is_visited])
 }
 
 const getVisitorIdByTokenService = async (client, visitor_token) => {
@@ -131,13 +131,13 @@ const checkDuplicateArtworkVisit = async (client, visitor_id, art_id) => {
   return await client.query(query, [visitor_id, art_id])
 }
 
-const editVisitService = async (client, visit_id, is_deleted) => {
+const editVisitService = async (client, visit_id, is_visited) => {
   let query = `
     UPDATE guia_db_artworkvisits
-    SET is_deleted = $2, updated_on = NOW()
+    SET is_visited = $2, updated_on = NOW()
     WHERE visit_id = $1;
   `
-  return await client.query(query, [visit_id, is_deleted])
+  return await client.query(query, [visit_id, is_visited])
 }
 
 module.exports = {
