@@ -73,8 +73,8 @@ const getArtworkChecklistPerVisitorService = async (client, visitor_token, secti
     artwork.artist_name,
     artwork.date_published,
     visit_info.visit_id,
-    visit_info.visit_type,
-    visit_info.art_visited_on
+    visit_info.is_visited,
+    visit_info.visit_type
   FROM guia_db_artwork artwork 
   LEFT JOIN
     (
@@ -82,16 +82,15 @@ const getArtworkChecklistPerVisitorService = async (client, visitor_token, secti
         visits.visit_id,
           visits.art_id_id,
         visits.visit_type,
-        visits.is_deleted,
+        visits.is_visited,
         visits.art_visited_on 
       FROM guia_db_artworkvisits visits
       WHERE visits.visitor_id_id IN (
         SELECT visitor_id  
         FROM guia_db_visitor 
-        WHERE visitor_token = $1 
+        WHERE visitor_token = $1
       )
       and DATE(visits.art_visited_on) = current_date 
-      and visits.is_deleted =  FALSE
     ) visit_info
     on visit_info.art_id_id = artwork.art_id 
   WHERE
