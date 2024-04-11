@@ -228,6 +228,78 @@ const deleteArtworkImageService = async (client, art_id) => {
   return query
 }
 
+/* Edit Artwork Services */
+const editArtworkService = async (client, artwork) => {
+  let query = `
+    UPDATE guia_db_artwork
+    SET 
+      title = $1,
+      artist_name = $2,
+      medium = $3,
+      date_published = $4,
+      dimen_width_cm = $5,
+      dimen_height_cm = $6,
+      dimen_length_cm = $7,
+      description = $8,
+      additional_info = $9,
+      updated_by_id = $10,
+      section_id_id = $11,
+      updated_on = NOW()
+    WHERE 
+      art_id = $12
+    RETURNING art_id;
+  `;
+
+  let result = await client.query(query, [
+    artwork.title,
+    artwork.artist_name,
+    artwork.medium,
+    artwork.date_published,
+    artwork.dimen_width_cm,
+    artwork.dimen_height_cm || null,
+    artwork.dimen_length_cm,
+    artwork.description,
+    artwork.additional_info,
+    artwork.updated_by,
+    artwork.section_id,
+    artwork.art_id,
+  ]);
+
+  return result.rows[0].art_id;
+}
+
+const getImageIDService = async(client, art_id) => {
+  let query = `
+    SELECT id FROM guia_db_artworkimage
+    WHERE
+      artwork_id = $1`;
+
+  const result = await client.query(query, [
+    art_id,
+  ]);
+
+  return result.rows;
+}
+
+const editArtworkImageService = async(client, image, thumbnail, id) => {
+  let query = `
+  UPDATE guia_db_artworkimage
+  SET
+    image_link = $1,
+    is_thumbnail = $2
+  WHERE
+    id = $3`;
+
+  await client.query(query, [
+    image,
+    thumbnail === image,
+    id,
+  ]);
+
+  return true;
+}
+
+
 module.exports = {
   getAllArtworkByAdminIdService,
   getArtworkByArtIdAdminIdService,
@@ -238,5 +310,8 @@ module.exports = {
   findDuplicateArtworkService,
   findSectionWithAccessByUserId,
   deleteArtworkService,
-  deleteArtworkImageService
+  deleteArtworkImageService,
+  editArtworkService,
+  editArtworkImageService,
+  getImageIDService,
 }
