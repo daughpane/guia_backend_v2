@@ -206,13 +206,13 @@ const findSectionWithAccessByUserId = async (client, admin_id) => {
   return client.query(query, [admin_id])
 }
 
-const deleteArtworkService = async (client, art_id) => {
+const deleteArtworkService = async (client, art_id, updated_by) => {
   //art_id if artwork
   const query = await client.query(`
     UPDATE guia_db_artwork
-    SET is_deleted = TRUE
+    SET is_deleted = TRUE, updated_by_id = $2, updated_on = NOW()
     WHERE art_id = $1
-  `, [art_id]);
+  `, [art_id, updated_by]);
 
   return query
 }

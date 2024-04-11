@@ -22,7 +22,7 @@ const { sortObject } = require("../../utils/functions");
 const getAllArtworkByAdminIdController = async (req, res, client) => {
   try {
     const { admin_id } = req.query;
-
+    
     const result  = await getAllArtworkByAdminIdService(client, admin_id)
 
     const artworks = await Promise.all(result.rows.map(async (row) => {
@@ -106,18 +106,18 @@ const createArtworkController = async (req, res, client) => {
 const deleteArtworkController = async (req, res, client) => {
   try {
     const { art_id } = req.body;
-    
+    const updated_by = req.admin_id
     if (!art_id) {
       return res.status(400).send({detail:"Artwork ID is required."})
     }
 
-    const artwork = await getArtworkByArtIdAdminIdService(client, art_id)
-
+    const artwork = await getArtworkByArtIdAdminIdService(client, art_id, updated_by)
+    
     if (artwork.rowCount < 1) {
       return res.status(400).send({detail: "Artwork does not exist."})
     } 
 
-    const result = await deleteArtworkService(client, art_id);
+    const result = await deleteArtworkService(client, art_id, updated_by);
     const image = await deleteArtworkImageService(client, art_id);
 
     return res.status(200).send({message: "Artwork deleted successfully."});
