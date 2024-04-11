@@ -135,6 +135,11 @@ const editArtworkController = async (req, res, client) => {
   try {
     let artwork = req.body;
 
+    if (req.admin_id != artwork.updated_by) {
+      return res.status(401).send({detail: "Admin does not have access to this action.", dev_message:"Admin ID and Updated by do not match."})
+    }
+
+
     //check if new images and thumbnail are provided
     const { images, thumbnail } = artwork;
 
