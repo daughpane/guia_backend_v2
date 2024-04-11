@@ -243,7 +243,8 @@ const editArtworkService = async (client, artwork) => {
       description = $8,
       additional_info = $9,
       updated_by_id = $10,
-      section_id_id = $11
+      section_id_id = $11,
+      updated_on = NOW()
     WHERE 
       art_id = $12
     RETURNING art_id;
