@@ -7,7 +7,10 @@ const {
   findDuplicateArtworkService,
   findSectionWithAccessByUserId,
   deleteArtworkService,
-  deleteArtworkImageService
+  deleteArtworkImageService,
+  editArtworkService,
+  editArtworkImageService,
+  getImageIDService
 } = require("./artwork.service")
 const { getPresignedUrls } = require("../../utils/amazon")
 const { sortObject } = require("../../utils/functions");
@@ -126,24 +129,49 @@ const deleteArtworkController = async (req, res, client) => {
 
 const editArtworkController = async (req, res, client) => {
   try {
-    var { title, artist_name, section_id, updated_by } = req.body;
-    
-    var duplicate = await findDuplicateArtworkService(client, title, artist_name, section_id)
-    if (duplicate.rowCount > 0) {
-      return res.status(406).send({ detail: "Artwork with the same title and artist name already exists." })
+    let artwork = req.body;
+
+    //check if new images and thumbnail are provided
+    const { images, thumbnail } = artwork;
+
+    var duplicate = await findDuplicateArtworkService(client, artwork.title, artwork.artist_name, artwork.section_id)    
+    let duplicateExists = false;
+    for (let row of duplicate.rows) {
+      if (row.art_id !== artwork.art_id) {
+        duplicateExists = true;
+        break;
+      }
     }
 
-    var sections = await findSectionWithAccessByUserId(client, updated_by)
-    if (!sections.rows.some(section => section.section_id == section_id)) {
-      return res.status(403).send({ detail: "Admin not allowed to edit artwork in this section." })
+    if (duplicate.rowCount > 0 && duplicateExists) {
+      res.status(406).send({ detail: "Artwork with the same title and artist name already exists." });
+      return;
+    }
+
+    var sections = await findSectionWithAccessByUserId(client, artwork.updated_by)
+    if (!sections.rows.some(section => section.section_id == artwork.section_id)) {
+      res.status(403).send({ detail: "Admin not allowed to edit artwork in this section." })
+      return
     }
     
-    return res.status(200).send("yeah")
+    //update artwork details
+    const art_id = await editArtworkService(client, artwork);
+
+    //update artwork images
+    const imageIDs = await getImageIDService(client, art_id);
+
+    imageIDs.map(async (id, idx) => {
+      const result = await editArtworkImageService(client, images[idx], thumbnail, id.id)
+    })
+
+    return res.status(201).send({message: "Artwork edited successfully."})
+
   } catch(err) {
     console.error('Error execution query', err);
     return res.status(500).send({detail: "Internal server error."});
   }
 }
+
 module.exports = {
   getAllArtworkByAdminIdController,
   createArtworkController,
