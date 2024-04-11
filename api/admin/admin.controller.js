@@ -51,6 +51,10 @@ const adminChangePasswordController = async (req, res, client) => {
   try {
     const { admin_id, old_password, new_password } = req.body;
 
+    if (req.admin_id != admin_id) {
+      return res.status(401).send({detail: "Logged in user does not have permission to change this account's password."})
+    }
+
     var admin = await getAdminById(client, admin_id)
 
     if (admin.rowCount < 1) {
