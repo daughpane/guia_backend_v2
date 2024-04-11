@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "@tensorflow/tfjs": "^4.17.0",
     "aws-sdk": "^2.1577.0",
     "cors": "^2.8.5",
     "crypto": "^1.0.1",
@@ -15,7 +16,6 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
     "serve": "nodemon index.js"
   },
   "keywords": [],
