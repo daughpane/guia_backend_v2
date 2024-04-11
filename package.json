@@ -1,9 +1,13 @@
 {
   "dependencies": {
+    "@tensorflow/tfjs": "^4.17.0",
     "aws-sdk": "^2.1577.0",
     "cors": "^2.8.5",
+    "crypto": "^1.0.1",
     "dotenv": "^16.4.5",
     "express": "^4.18.3",
+    "express-validator": "^7.0.1",
+    "jsonwebtoken": "^9.0.2",
     "path": "^0.12.7",
     "pg": "^8.11.3",
     "pg-promise": "^11.5.4"
@@ -12,8 +16,7 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "serve": "nodemon app.js"
+    "serve": "nodemon index.js"
   },
   "keywords": [],
   "author": "",
