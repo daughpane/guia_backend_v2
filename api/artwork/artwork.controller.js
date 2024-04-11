@@ -64,6 +64,10 @@ const createArtworkController = async (req, res, client) => {
   try {
     let artwork = req.body;
 
+    if (req.admin_id != artwork.added_by) {
+      return res.status(401).send({detail: "Admin does not have access to this action.", dev_message:"Admin ID and Added by do not match."})
+    }
+
     // error handling
     var duplicate = await findDuplicateArtworkService(client, artwork.title, artwork.artist_name, artwork.section_id)
     if (duplicate.rowCount > 0) {
@@ -72,7 +76,7 @@ const createArtworkController = async (req, res, client) => {
 
     var sections = await findSectionWithAccessByUserId(client, artwork.added_by)
     if (!sections.rows.some(section => section.section_id == artwork.section_id)) {
-      return res.status(403).send({ detail: "Admin not allowed to edit artwork in this section." })
+      return res.status(403).send({ detail: "Admin not allowed to add artwork in this section." })
     }
 
     // isolate thumbnail and images
