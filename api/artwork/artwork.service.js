@@ -108,29 +108,40 @@ const getArtworkImagesByArtIdService = async (client, art_id) => {
 /* Create Artwork Services */
 
 // add new row to guia_db_artwork
-const createArtworkService = async (client, artwork) => {
-
+const createArtworkService = async (
+  client,
+  added_by,
+  additional_info,
+  artist_name,
+  date_published,
+  description,
+  dimen_height_cm,
+  dimen_length_cm,
+  dimen_width_cm,
+  medium,
+  section_id,
+  title
+) => {
   // query for artwork table
   let query = `INSERT INTO guia_db_artwork
-  VALUES (DEFAULT, $12, $3, $10, $5, $9, $8, `;
-
-  if(artwork.dimen_height_cm) {
-    query += `$7`;
-  } else {
-    query += `NULL`;
-  }
-
-  query += `, $6, `;
-
-  if(artwork.additional_info) {
-    query += `$2`;
-  } else {
-    query += `NULL`;
-  }
-
-  query += `, $4, NULL, false, $1, $11, NULL) RETURNING art_id;`;
-  
-  let result = await client.query(query, Object.values(artwork));
+  VALUES (
+    DEFAULT,
+    $1, $2, $3, $4, $5, $6, $7, $8, $9, NOW(), null, false, $10, $11, null) 
+   RETURNING art_id;`;
+  let vars = [
+    title, 
+    artist_name,
+    medium,
+    date_published,
+    dimen_width_cm,
+    dimen_length_cm,
+    dimen_height_cm,
+    description,
+    additional_info,
+    added_by,
+    section_id
+  ]
+  let result = await client.query(query, vars);
   return result.rows[0].art_id;
 }
 
