@@ -313,7 +313,8 @@ const predictArtworkService = async(client, image) => {
   const prediction = loadedModel.predict(imageBatch); // Use the batched image tensor
   const predictionData = await prediction.data();
 
-  return predictionData;
+  const result = predictionData.findIndex(val => val === 1);
+  return result;
 }
 
 

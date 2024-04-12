@@ -176,8 +176,7 @@ const predictArtworkController = async (req, res, client) => {
   try {
     const image = req.file.buffer;
     const result = await predictArtworkService(client, image);
-    // console.log(result);
-    res.json({ prediction: result });
+    res.json({ art_id: result });
   } catch (err) {
     console.log(err);
     res.status(500).send({detail: "Internal server error."});
