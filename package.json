@@ -1,6 +1,7 @@
 {
   "dependencies": {
     "@tensorflow/tfjs": "^4.17.0",
+    "@tensorflow/tfjs-node": "3.18.0",
     "aws-sdk": "^2.1577.0",
     "cors": "^2.8.5",
     "crypto": "^1.0.1",
