@@ -1,3 +1,8 @@
+
+const tf = require('@tensorflow/tfjs-node');
+
+const { model } = require('../../model/model.json');
+
 /*
 * TODO: Add more error handling
  */
@@ -299,6 +304,18 @@ const editArtworkImageService = async(client, image, thumbnail, id) => {
   return true;
 }
 
+const predictArtworkService = async(client, image) => {
+  let imageTensor = tf.node.decodeImage(image);
+  imageTensor = tf.image.resizeBilinear(imageTensor, [224, 224]); // Resize the image
+  const imageBatch = imageTensor.expandDims(0); // Add an extra dimension
+
+  const loadedModel = await tf.loadLayersModel('file://model/model.json');
+  const prediction = loadedModel.predict(imageBatch); // Use the batched image tensor
+  const predictionData = await prediction.data();
+
+  return predictionData;
+}
+
 
 module.exports = {
   getAllArtworkByAdminIdService,
@@ -314,4 +331,5 @@ module.exports = {
   editArtworkService,
   editArtworkImageService,
   getImageIDService,
+  predictArtworkService,
 }
