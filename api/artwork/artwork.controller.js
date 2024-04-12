@@ -30,7 +30,7 @@ const getAllArtworkByAdminIdController = async (req, res, client) => {
       return { ...row, image_thumbnail: presignedUrl };
     }));
     
-    return res.status(200).send({artworks: artworks});
+    return res.status(201).send({artworks: artworks});
   } catch (err) {
     return res.status(500).send({detail: "Internal server error."});
   }
@@ -86,12 +86,23 @@ const createArtworkController = async (req, res, client) => {
     // modify artwork contents
     delete artwork.images;
     delete artwork.thumbnail;
-    artwork.date = new Date(); // for the added_on column
 
     // sort keys alphabetically
     artwork = sortObject(artwork);
 
-    const art_id = await createArtworkService(client, artwork);
+    const art_id = await createArtworkService(client,
+      artwork.added_by,
+      artwork.additional_info,
+      artwork.artist_name,
+      artwork.date_published,
+      artwork.description,
+      artwork.dimen_height_cm,
+      artwork.dimen_length_cm,
+      artwork.dimen_width_cm,
+      artwork.medium,
+      artwork.section_id,
+      artwork.title
+    );
 
     const imageResult = await createArtworkImageService(client, images, thumbnail, art_id);
 
