@@ -1,9 +1,11 @@
-const { getDashboardController } = require("./dashboard.controller")
-
 const express = require("express")
-const { connectDatabase } = require("../../middlewares/connectDatabase")
 const router = express.Router()
 
-router.get("/get", connectDatabase(getDashboardController))
+const { connectDatabase } = require("../../middlewares/connectDatabase")
+const { checkToken } = require("../../middlewares/checkToken")
+
+const { getDashboardController } = require("./dashboard.controller")
+
+router.get("/get", checkToken, connectDatabase(getDashboardController))
 
 module.exports = router;

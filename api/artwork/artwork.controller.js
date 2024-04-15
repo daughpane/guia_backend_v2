@@ -22,7 +22,7 @@ const { sortObject } = require("../../utils/functions");
 const getAllArtworkByAdminIdController = async (req, res, client) => {
   try {
     const { admin_id } = req.query;
-
+    
     const result  = await getAllArtworkByAdminIdService(client, admin_id)
 
     const artworks = await Promise.all(result.rows.map(async (row) => {
@@ -30,7 +30,7 @@ const getAllArtworkByAdminIdController = async (req, res, client) => {
       return { ...row, image_thumbnail: presignedUrl };
     }));
     
-    return res.status(200).send({artworks: artworks});
+    return res.status(201).send({artworks: artworks});
   } catch (err) {
     return res.status(500).send({detail: "Internal server error."});
   }
@@ -64,6 +64,10 @@ const createArtworkController = async (req, res, client) => {
   try {
     let artwork = req.body;
 
+    if (req.admin_id != artwork.added_by) {
+      return res.status(401).send({detail: "Admin does not have access to this action.", dev_message:"Admin ID and Added by do not match."})
+    }
+
     // error handling
     var duplicate = await findDuplicateArtworkService(client, artwork.title, artwork.artist_name, artwork.section_id)
     if (duplicate.rowCount > 0) {
@@ -72,7 +76,7 @@ const createArtworkController = async (req, res, client) => {
 
     var sections = await findSectionWithAccessByUserId(client, artwork.added_by)
     if (!sections.rows.some(section => section.section_id == artwork.section_id)) {
-      return res.status(403).send({ detail: "Admin not allowed to edit artwork in this section." })
+      return res.status(403).send({ detail: "Admin not allowed to add artwork in this section." })
     }
 
     // isolate thumbnail and images
@@ -82,12 +86,23 @@ const createArtworkController = async (req, res, client) => {
     // modify artwork contents
     delete artwork.images;
     delete artwork.thumbnail;
-    artwork.date = new Date(); // for the added_on column
 
     // sort keys alphabetically
     artwork = sortObject(artwork);
 
-    const art_id = await createArtworkService(client, artwork);
+    const art_id = await createArtworkService(client,
+      artwork.added_by,
+      artwork.additional_info,
+      artwork.artist_name,
+      artwork.date_published,
+      artwork.description,
+      artwork.dimen_height_cm,
+      artwork.dimen_length_cm,
+      artwork.dimen_width_cm,
+      artwork.medium,
+      artwork.section_id,
+      artwork.title
+    );
 
     const imageResult = await createArtworkImageService(client, images, thumbnail, art_id);
 
@@ -106,18 +121,18 @@ const createArtworkController = async (req, res, client) => {
 const deleteArtworkController = async (req, res, client) => {
   try {
     const { art_id } = req.body;
-    
+    const updated_by = req.admin_id
     if (!art_id) {
       return res.status(400).send({detail:"Artwork ID is required."})
     }
 
-    const artwork = await getArtworkByArtIdAdminIdService(client, art_id)
-
+    const artwork = await getArtworkByArtIdAdminIdService(client, art_id, updated_by)
+    
     if (artwork.rowCount < 1) {
       return res.status(400).send({detail: "Artwork does not exist."})
     } 
 
-    const result = await deleteArtworkService(client, art_id);
+    const result = await deleteArtworkService(client, art_id, updated_by);
     const image = await deleteArtworkImageService(client, art_id);
 
     return res.status(200).send({message: "Artwork deleted successfully."});
@@ -130,6 +145,11 @@ const deleteArtworkController = async (req, res, client) => {
 const editArtworkController = async (req, res, client) => {
   try {
     let artwork = req.body;
+
+    if (req.admin_id != artwork.updated_by) {
+      return res.status(401).send({detail: "Admin does not have access to this action.", dev_message:"Admin ID and Updated by do not match."})
+    }
+
 
     //check if new images and thumbnail are provided
     const { images, thumbnail } = artwork;
