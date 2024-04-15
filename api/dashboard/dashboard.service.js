@@ -32,19 +32,25 @@ const getDashboardVisitorsLast24HByAdminIdService = async (client, admin_id) => 
 
 const getDashboardMostVisitedArtworksByAdminIdService = async (client, admin_id) => {
     let query = `
-    SELECT av.art_id_id, count(*) AS visit_count
+    SELECT a.*, image.image_link as image_thumbnail, count(*) AS visit_count
     FROM public.guia_db_artworkvisits av
     INNER JOIN public.guia_db_artwork a ON av.art_id_id = a.art_id
     INNER JOIN public.guia_db_section s ON a.section_id_id = s.section_id
     INNER JOIN public.guia_db_admin ad ON s.museum_id_id = ad.museum_id_id
-    WHERE art_visited_on >= NOW() - INTERVAL '24 HOURS' 
+    INNER JOIN public.guia_db_artworkimage image ON a.art_id = image.artwork_id 
+
+    WHERE
+      art_visited_on >= NOW() - INTERVAL '24 HOURS'
+      AND a.is_deleted = FALSE
+      AND image.is_thumbnail = true
+
     `
 
     if (admin_id) {
-        query+= `AND ad.user_id = $1`
+        query+= ` AND ad.user_id = $1`
       }   
 
-    query += ` GROUP BY av.art_id_id
+    query += ` GROUP BY a.art_id, image.image_link  
     ORDER BY visit_count DESC
     LIMIT 3;`
 
@@ -54,7 +60,7 @@ const getDashboardMostVisitedArtworksByAdminIdService = async (client, admin_id)
 const getDashboardMostCrowdedSectionsByAdminIdService = async (client, admin_id) => {
 
     let query = `
-    SELECT s.section_id, COUNT(*) AS visit_count
+    SELECT s.section_id, s.section_name, s.museum_id_id as museum_id, COUNT(*) AS visit_count
     FROM public.guia_db_admin ad
     INNER JOIN public.guia_db_section s ON ad.museum_id_id = s.museum_id_id
     INNER JOIN public.guia_db_artwork a ON s.section_id = a.section_id_id

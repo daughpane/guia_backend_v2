@@ -13,7 +13,7 @@ const generateToken = (payload, expiresIn = adminExpiry) => {
 
 const getTokenExpiry = (token) => {
   try {
-      const decodedToken = jwt.verify(token, secretKey);
+    const decodedToken = jwt.verify(token, secretKey);
       if (decodedToken && decodedToken.exp) {
           // Expiration time is in seconds since epoch, convert to milliseconds
           const expirationTimeMillis = decodedToken.exp * 1000;
@@ -27,8 +27,18 @@ const getTokenExpiry = (token) => {
   }
 }
 
+const decodeToken = (token) => {
+  try {
+    return jwt.verify(token, secretKey)
+  } catch (error) {
+      console.error('Error decoding token:', error.message);
+      throw new Error('Token cannot be verified.')
+  }
+}
+
 
 module.exports = {
   generateToken,
-  getTokenExpiry
+  getTokenExpiry,
+  decodeToken
 }

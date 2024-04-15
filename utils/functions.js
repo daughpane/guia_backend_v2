@@ -28,9 +28,24 @@ const thumbnailInImages = (thumbnail, { req }) => {
     return true;
 };
 
+const isDatetimePassed = (datetime) => {
+  const givenDatetime = new Date(datetime);
+
+  // Get the current datetime
+  const currentDatetime = new Date();
+
+  // Calculate the datetime 5 minutes ago
+  const fiveMinutesBefore = new Date(givenDatetime.getTime() - 5 * 60 * 1000);
+
+  // Compare the given datetime with the current datetime and 5 minutes ago
+
+  return currentDatetime >= fiveMinutesBefore || givenDatetime < currentDatetime;
+}
+
 module.exports = {
   sortObject,
   greaterThanZero,
   validateImagesLength,
-  thumbnailInImages
+  thumbnailInImages,
+  isDatetimePassed
 }
