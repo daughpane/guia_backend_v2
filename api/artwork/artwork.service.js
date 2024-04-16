@@ -1,7 +1,18 @@
 
 const tf = require('@tensorflow/tfjs-node');
+const AWS = require('aws-sdk');
+const fs = require('fs');
+const util = require('util');
+const writeFile = util.promisify(fs.writeFile);
 
 const { model } = require('../../model/model.json');
+
+AWS.config.update({
+  accessKeyId: 'AKIAYS2NTMDGWGCCDXMG',
+  secretAccessKey: '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'
+})
+
+const s3 = new AWS.S3();
 
 /*
 * TODO: Add more error handling
@@ -314,18 +325,53 @@ const editArtworkImageService = async(client, image, thumbnail, id) => {
 
   return true;
 }
+// const getSignedUrl = async (bucket, key) => {
+//   const params = {
+//     Bucket: bucket,
+//     Key: key,
+//     Expires: 60
+//   }
+
+//   return new Promise((resolve, reject) => {
+//     s3.getSignedUrl('getObject', params, (err, url) => {
+//       if (err) 
+//         reject (err)
+//       else 
+//         resolve(url)
+//     })
+//   })
+// }
 
 const predictArtworkService = async(client, image) => {
+  try {
   let imageTensor = tf.node.decodeImage(image);
   imageTensor = tf.image.resizeBilinear(imageTensor, [224, 224]); // Resize the image
   const imageBatch = imageTensor.expandDims(0); // Add an extra dimension
+  // const loadedModel = await tf.loadLayersModel('file://model/model.json');
+  const params = {
+    Bucket: 'guia-buckets',
+    Prefix: 'model/'
+  }
+  const modelFile = await s3.listObjectsV2(params).promise();
+  // console.log(modelFile.Contents)
+  // await writeFile('model/', modelFile.Body);
 
-  const loadedModel = await tf.loadLayersModel('file://model/model.json');
-  const prediction = loadedModel.predict(imageBatch); // Use the batched image tensor
-  const predictionData = await prediction.data();
-
-  const result = predictionData.findIndex(val => val === 1);
-  return ({art_id: result});
+  // const modelUrl = await getSignedUrl('guia-buckets', 'model/model.json')
+  // console.log(modelUrl)
+  const fileBlob = new Blob(modelFile.Contents.map(item => item));
+  console.log(fileBlob)
+  // const jsonModel = modelFile.Contents.filter(i => i.Key.endsWith(".json"))
+  // console.log(jsonModel)
+  // const loadedModel = await tf.loadLayersModel(modelFile);
+  // const prediction = loadedModel.predict(imageBatch); // Use the batched image tensor
+  // const predictionData = await prediction.data();
+  // console.log(prediction)
+  // const result = predictionData.findIndex(val => val === 1);
+  
+  return ({art_id: 0});
+  } catch (err) {
+    console.log(err);
+  }
 }
 
 
