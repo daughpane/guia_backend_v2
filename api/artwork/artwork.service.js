@@ -325,7 +325,7 @@ const predictArtworkService = async(client, image) => {
   const predictionData = await prediction.data();
 
   const result = predictionData.findIndex(val => val === 1);
-  return ({art_id: result});
+  return result;
 }
 
 

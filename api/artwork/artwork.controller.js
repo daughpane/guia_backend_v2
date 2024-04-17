@@ -196,8 +196,29 @@ const predictArtworkController = async (req, res, client) => {
   try {
     const image = req.file.buffer;
     const result = await predictArtworkService(client, image);
-    if(result.art_id >= 0) {
-      res.status(200).send(result);
+    if(result >= 0) {
+      // change this to the actual art_id each artwork
+      /* Arrangement
+        1. After the Fire
+        2. Beast of Burden
+        3. Gifts of Hymn
+        4. Imperfectly Beautiful
+        5. J. Karl Roque 1
+        6. J. Karl Roque 2
+        7. Kandila Mam Sir
+        8. Kagawasan
+        9. Luha sa mga Anghel
+        10. Mother and Child
+        11. Not so Clean State
+        12. Panata
+        13. Red Forest
+        14. Sabungero
+        15. Sentinels Fire
+        16. The Rebirth of Icarus
+        17. Unnamed Artwork
+      */
+      class_indices = [1, 20, 21, 2, 22, 23, 24, 25, 26, 27, 28, 29, 30, 3, 31, 32, 33]
+      res.status(200).send({art_id: class_indices[result]});
     } else {
       res.status(400).send({detail: "Error parsing image"})
     }
