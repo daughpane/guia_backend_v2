@@ -217,7 +217,7 @@ const predictArtworkController = async (req, res, client) => {
         16. The Rebirth of Icarus
         17. Unnamed Artwork
       */
-      class_indices = [1, 20, 21, 2, 22, 23, 24, 25, 26, 27, 28, 29, 30, 3, 31, 32, 33]
+      class_indices = [1, 8, 18, 2, 14, 15, 16, 11, 12, 6, 7, 17, 9, 3, 10, 13, 19]
       res.status(200).send({art_id: class_indices[result]});
     } else {
       res.status(400).send({detail: "Error parsing image"})
