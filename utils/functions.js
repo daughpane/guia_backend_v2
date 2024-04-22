@@ -42,10 +42,19 @@ const isDatetimePassed = (datetime) => {
   return currentDatetime >= fiveMinutesBefore || givenDatetime < currentDatetime;
 }
 
+const visitType = (value) => {
+  if (value !== 'manual' && value !== 'scan') {
+      throw new Error('Type must be either "manual" or "scan"');
+    }
+    // Return true if the value is valid
+    return true;
+}
+
 module.exports = {
   sortObject,
   greaterThanZero,
   validateImagesLength,
   thumbnailInImages,
-  isDatetimePassed
+  isDatetimePassed,
+  visitType
 }

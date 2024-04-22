@@ -10,8 +10,7 @@ const {
   deleteArtworkImageService,
   editArtworkService,
   editArtworkImageService,
-  getImageIDService,
-  predictArtworkService
+  getImageIDService
 } = require("./artwork.service")
 const { getPresignedUrls } = require("../../utils/amazon")
 const { sortObject } = require("../../utils/functions");
@@ -192,26 +191,10 @@ const editArtworkController = async (req, res, client) => {
   }
 }
 
-const predictArtworkController = async (req, res, client) => {
-  try {
-    const image = req.file.buffer;
-    const result = await predictArtworkService(client, image);
-    if(result.art_id >= 0) {
-      res.status(200).send(result);
-    } else {
-      res.status(400).send({detail: "Error parsing image"})
-    }
-  } catch (err) {
-    console.log(err);
-    res.status(500).send({detail: "Internal server error."});
-  }
-}
-
 module.exports = {
   getAllArtworkByAdminIdController,
   createArtworkController,
   getArtworkByArtIdAdminIdController,
   editArtworkController,
-  deleteArtworkController,
-  predictArtworkController
+  deleteArtworkController
 }
