@@ -5,7 +5,7 @@ const path = require("path");
 const cors = require("cors");
 
 const { checkAPI } = require("./middlewares/checkApi");
-
+const { redisClient } = require("./config/redis")
 const router = require("./router")
 
 const app = express();

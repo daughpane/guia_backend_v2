@@ -1,8 +1,3 @@
-
-const tf = require('@tensorflow/tfjs-node');
-
-const { model } = require('../../model/model.json');
-
 /*
 * TODO: Add more error handling
  */
@@ -343,5 +338,4 @@ module.exports = {
   editArtworkService,
   editArtworkImageService,
   getImageIDService,
-  predictArtworkService,
 }

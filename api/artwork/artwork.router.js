@@ -11,8 +11,7 @@ const {
   getArtworkByArtIdAdminIdController,
   createArtworkController,
   editArtworkController,
-  deleteArtworkController,
-  predictArtworkController
+  deleteArtworkController
 } = require("./artwork.controller")
 
 const {
@@ -25,12 +24,15 @@ const {
   checkToken
 } = require("../../middlewares/checkToken")
 
+const {
+  getAllArtworkCache, 
+  getArtworkCache
+} = require("./artwork.cache")
 
-router.get("/get/all", connectDatabase(getAllArtworkByAdminIdController))
+router.get("/get/all", getAllArtworkCache, connectDatabase(getAllArtworkByAdminIdController))
 router.post("/delete", checkToken, connectDatabase(deleteArtworkController))
-router.get("/get", getArtworkByArtIdAdminIdValidator, handleValidationErrors, connectDatabase(getArtworkByArtIdAdminIdController))
+router.get("/get", getArtworkByArtIdAdminIdValidator, getArtworkCache, handleValidationErrors, connectDatabase(getArtworkByArtIdAdminIdController))
 router.post("/create", checkToken, createArtworkValidator, handleValidationErrors, connectDatabase(createArtworkController))
 router.post("/edit", checkToken, editArtworkValidator, handleValidationErrors, connectDatabase(editArtworkController))
-router.post("/predict", upload.single('image'), connectDatabase(predictArtworkController))
 
 module.exports = router;

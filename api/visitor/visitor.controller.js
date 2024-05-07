@@ -1,5 +1,5 @@
 const { generateToken } = require("../../utils/token")
-const { getArtworksPerSectionIdService } = require("../artwork/artwork.service")
+const { getArtworksPerSectionIdService, getArtworkByArtIdAdminIdService } = require("../artwork/artwork.service")
 const {
   getVisitorTokenService,
   getArtworkVisitsPerSectionIdService,
@@ -100,41 +100,62 @@ const getArtworkChecklistPerVisitorController = async (req, res, client) => {
 const editArtworkChecklistPerVisitorController = async (req, res, client) => {
   try {
     const { art_id, is_visited, visit_type, visitor_token, visit_id } = req.body
-    var curr_visit_id;
 
     const visitor = await getVisitorIdByTokenService(client, visitor_token)
 
     if (visitor.rowCount < 1) {
-      return res.status(401).send({detail:"Visitor token not found."})
+      return res.status(401).send({ detail: "Visitor token not found." })
+    }
+
+    // Check if artwork exists
+    const artwork = await getArtworkByArtIdAdminIdService(client, art_id)
+    
+    if (artwork.rowCount < 1) {
+      return res.status(400).send({ detail: "Artwork does not exist." })
     }
     
     const visitor_id = visitor.rows[0].visitor_id
-    
-    if (!visit_id) {
-      const duplicateVisit = await checkDuplicateArtworkVisit(client, visitor_id, art_id)
 
-      if (duplicateVisit.rowCount > 0) {
-        curr_visit_id = duplicateVisit.rows[0].visit_id;
-        // console.log(duplicateVisit.rows[0].visit_id)
-        // return res.status(500).send(
-        //   {
-        //     detail: "Error editing artwork checklist.",
-        //     dev_message: "Visit to this artwork already exists. Refresh to see the visit_id."
-        //   }
-        // )
-      } else {
-        const visit = await addNewVisitService(client, visitor_id, art_id, visit_type, is_visited)
-  
-        if (visit.rowCount > 0) {
-          return res.status(200).send({visit_id: visit.rows[0].visit_id, message:"Artwork checklist edited successfully."})
-        } 
-  
-        return res.status(500).send({ detail: "Error editing artwork checklist." })
-      }
+    const duplicateVisit = await checkDuplicateArtworkVisit(client, visitor_id, art_id)
+
+    if (visit_type == "scan" && duplicateVisit.rowCount > 0) {
+      visit_id = duplicateVisit.rows[0].visit_id
     }
-    
-    if (visit_id || curr_visit_id) {
-      const editChecklist = await editVisitService(client, visit_id ? visit_id : curr_visit_id, is_visited)
+
+    if (
+      (visit_type === "scan" && is_visited == "false") ||
+      (visit_type=="manual" && duplicateVisit.rowCount > 0 && duplicateVisit.rows[0].visit_type=="scan")
+    ) {
+      return res.status(500).send(
+        {
+          detail: "Error editing artwork checklist.",
+          dev_message: "Cannot edit artwork checklist if scanned."
+        }
+      )
+    }
+
+    if (!visit_id) {
+      if(visit_type=="manual"){
+        if (duplicateVisit.rowCount > 0) {
+          return res.status(500).send(
+            {
+              detail: "Error editing artwork checklist.",
+              dev_message: "Visit to this artwork already exists. Refresh to see the visit_id."
+            }
+          )
+        }
+      } 
+      const visit = await addNewVisitService(client, visitor_id, art_id, visit_type, is_visited)
+
+      if (visit.rowCount > 0) {
+        return res.status(200).send({visit_id: visit.rows[0].visit_id, message:"Artwork checklist edited successfully."})
+      } 
+
+      return res.status(500).send({ detail: "Error editing artwork checklist." })
+    } else {
+      console.log(visit_id, is_visited, visit_type)
+      const editChecklist = await editVisitService(client, visit_id, is_visited, visit_type)
+      console.log(editChecklist)
 
       if (editChecklist.rowCount < 1) {
         return res.status(500).send({detail: "Error editing artwork checklist."})

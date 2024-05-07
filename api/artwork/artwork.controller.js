@@ -10,12 +10,11 @@ const {
   deleteArtworkImageService,
   editArtworkService,
   editArtworkImageService,
-  getImageIDService,
-  predictArtworkService
+  getImageIDService
 } = require("./artwork.service")
 const { getPresignedUrls } = require("../../utils/amazon")
 const { sortObject } = require("../../utils/functions");
-
+const {setCache} = require("../../middlewares/checkCache")
 /*
 * TODO: Add more error handling
  */
@@ -29,8 +28,8 @@ const getAllArtworkByAdminIdController = async (req, res, client) => {
       const presignedUrl = await getPresignedUrls(row.image_thumbnail);
       return { ...row, image_thumbnail: presignedUrl };
     }));
-    
-    return res.status(201).send({artworks: artworks});
+    await setCache(admin_id.toString(), { artworks: artworks })
+    return res.status(201).send({ artworks: artworks });
   } catch (err) {
     return res.status(500).send({detail: "Internal server error."});
   }
@@ -53,6 +52,8 @@ const getArtworkByArtIdAdminIdController = async (req, res, client) => {
     }));
 
     const result = { ...artwork.rows[0], images: images }
+    await setCache(art_id.toString(), { artwork: result })
+
     return res.status(200).send({ artwork: result })
   } catch (err) {
     console.log(err)
@@ -233,6 +234,5 @@ module.exports = {
   createArtworkController,
   getArtworkByArtIdAdminIdController,
   editArtworkController,
-  deleteArtworkController,
-  predictArtworkController
+  deleteArtworkController
 }

@@ -1,5 +1,5 @@
 const { query, body } = require('express-validator');
-
+const { visitType } = require('../../utils/functions')
 const getArtworkVisitsPerSectionIdValidator = [
     query('section_id')
         .notEmpty().withMessage('Section ID is required.')
@@ -17,6 +17,10 @@ const editArtworkChecklistPerVisitorValidator = [
   body('is_visited')
     .trim().notEmpty().withMessage('is_visited is required.')
     .isBoolean().withMessage('is_visited only accepts boolean value.'),
+  body('visit_type')
+    .trim().notEmpty().withMessage('Visit type is required.')
+    .custom(visitType).withMessage('visit_type only accepts scan or manual')
+  
 ]
 
 module.exports = {
