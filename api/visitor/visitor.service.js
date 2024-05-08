@@ -132,13 +132,13 @@ const checkDuplicateArtworkVisit = async (client, visitor_id, art_id) => {
   return await client.query(query, [visitor_id, art_id])
 }
 
-const editVisitService = async (client, visit_id, is_visited, visit_type) => {
+const editVisitService = async (client, visit_id, is_visited) => {
   let query = `
     UPDATE guia_db_artworkvisits
-    SET is_visited = $2, updated_on = NOW(), visit_type = $3
+    SET is_visited = $2, updated_on = NOW()
     WHERE visit_id = $1;
   `
-  return await client.query(query, [visit_id, is_visited, visit_type])
+  return await client.query(query, [visit_id, is_visited])
 }
 
 module.exports = {
