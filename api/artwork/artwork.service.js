@@ -1,5 +1,6 @@
 
 const tf = require('@tensorflow/tfjs-node');
+const axios = require('axios');
 
 const { model } = require('../../model/model.json');
 
@@ -315,16 +316,35 @@ const editArtworkImageService = async(client, image, thumbnail, id) => {
   return true;
 }
 
+// const predictArtworkService = async(client, image) => {
+//   let imageTensor = tf.node.decodeImage(image);
+//   imageTensor = tf.image.resizeBilinear(imageTensor, [224, 224]); // Resize the image
+//   const imageBatch = imageTensor.expandDims(0); // Add an extra dimension
+
+//   const loadedModel = await tf.loadLayersModel('file://model/model.json');
+//   const prediction = loadedModel.predict(imageBatch); // Use the batched image tensor
+//   const predictionData = await prediction.data();
+
+//   const result = predictionData.findIndex(val => val === 1);
+//   return result;
+// }
+
 const predictArtworkService = async(client, image) => {
   let imageTensor = tf.node.decodeImage(image);
   imageTensor = tf.image.resizeBilinear(imageTensor, [224, 224]); // Resize the image
   const imageBatch = imageTensor.expandDims(0); // Add an extra dimension
+  const predictionData = await imageBatch.array();
 
-  const loadedModel = await tf.loadLayersModel('file://model/model.json');
-  const prediction = loadedModel.predict(imageBatch); // Use the batched image tensor
-  const predictionData = await prediction.data();
+  const response = await axios.post('https://guia-latest-model-endpoint.southeastasia.inference.ml.azure.com/score', {
+    data: predictionData
+  }, {
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${nQMtdjWMZEaxgGZqozdOxCPoQupmcHS2}`
+    }
+  });
 
-  const result = predictionData.findIndex(val => val === 1);
+  const result = response.data.findIndex(val => val === 1);
   return result;
 }
 
