@@ -200,7 +200,7 @@ const predictArtworkController = async (req, res, client) => {
   const tmpFile = await tmp.file();
   await fs.writeFile(tmpFile.path, image.buffer);
 
-  const py = spawn("python", ["predict.py", tmpFile.path]);
+  const py = spawn("python3", ["predict.py", tmpFile.path]);
 
   const result = await new Promise((resolve, reject) => {
     let output;
