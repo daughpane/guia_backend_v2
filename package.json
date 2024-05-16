@@ -18,7 +18,8 @@
   "main": "index.js",
   "scripts": {
     "serve": "nodemon index.js",
-    "install-all": "npm install && pip install -r requirements.txt"
+    "install-all": "npm install && pip install -r requirements.txt",
+    "c-build": "npm run install-all && npm run build"
   },
   "keywords": [],
   "author": "",
