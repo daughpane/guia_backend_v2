@@ -1,8 +1,10 @@
 import requests
+import sys
+
 ## Put your own REST endpoint
 url = "https://guia-endpoint.southeastasia.inference.ml.azure.com/score"
 payload={}
-img_file = '/content/gdrive/Shareddrives/KBytes Projects/CMSC129/Guia AI/FINAL_ARTWORKS/RAW/Imperfectly Beautiful/IMG_20240311_152409.jpg'
+img_file = sys.argv[1]
 
 
 files=[
@@ -13,3 +15,5 @@ headers = {
 }
 response = requests.request("POST", url, headers=headers, files=files)
 print(response.text)
+
+sys.stdout.flush()
