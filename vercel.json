@@ -19,6 +19,5 @@
     "api/**/*.py": {
       "runtime": "vercel-python@3.8"
     }
-  },
-  "includeFiles": ["requirements.txt"]
+  }
 }
