@@ -3,10 +3,7 @@
   "builds": [
     {
       "src": "./index.js",
-      "use": "@vercel/node",
-      "config": {
-        "installCommand": "npm run custom-build"
-      }
+      "use": "@vercel/node"
     }
   ],
   "routes": [
@@ -15,5 +12,13 @@
       "dest": "/"
     }
   ], 
-  "outputDirectory": "index.js"
+  "functions": {
+    "api/**/*.js": {
+      "runtime": "vercel-node@33.4.1"
+    },
+    "api/**/*.py": {
+      "runtime": "vercel-python@3.8"
+    }
+  },
+  "includeFiles": ["requirements.txt"]
 }
