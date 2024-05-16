@@ -17,18 +17,8 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "serve": "nodemon index.js"
-  },
-  "vercel": {
-    "functions": {
-      "index.js": {
-        "runtime": "vercel-node@33.4.1"
-      },
-      "predict.py": {
-        "runtime": "python3.8",
-        "includeFiles": ["requirements.txt"]
-      }
-    }
+    "serve": "nodemon index.js",
+    "custom-build": "npm install && pip install requests"
   },
   "keywords": [],
   "author": "",
