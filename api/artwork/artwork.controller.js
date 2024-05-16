@@ -14,6 +14,7 @@ const {
 } = require("./artwork.service")
 const { getPresignedUrls } = require("../../utils/amazon")
 const { sortObject } = require("../../utils/functions");
+const fs = require('fs');
 
 /*
 * TODO: Add more error handling
@@ -191,10 +192,43 @@ const editArtworkController = async (req, res, client) => {
   }
 }
 
+const predictArtworkController = async (req, res, client) => {
+  // const image = new Image("api/artwork/test-picture.jpg");
+
+  // const context = image.getContext('2d');
+        
+  // context.drawImage(videoElement, 0, 0, 224, 224);
+  // const img = image.toDataURL('image/jpeg');
+
+  const myHeaders = new Headers();
+  myHeaders.append("Authorization", "Bearer jbv3mXKaXYSiKBADR6gI4v8qOAseSJYi");
+  myHeaders.append("Content-Type", "multipart/form-data");
+
+  const formdata = new FormData();
+  formdata.append("image", fs.createReadStream('api/artwork/test-picture.jpg'));
+  console.log(formdata)
+  
+  const requestOptions = {
+    method: "POST",
+    headers: myHeaders,
+    body: formdata,
+    redirect: "follow"
+  };
+  fetch("https://guia-endpoint.southeastasia.inference.ml.azure.com/score", requestOptions)
+    .then((response) => response.text())
+    .then((result) => {
+      console.log(result)
+      res.status(200).send("Working so far");
+    })
+    .catch((error) => console.error(error));
+
+}
+
 module.exports = {
   getAllArtworkByAdminIdController,
   createArtworkController,
   getArtworkByArtIdAdminIdController,
   editArtworkController,
-  deleteArtworkController
+  deleteArtworkController,
+  predictArtworkController
 }
