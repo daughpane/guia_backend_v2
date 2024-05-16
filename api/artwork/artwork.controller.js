@@ -14,6 +14,9 @@ const {
 } = require("./artwork.service")
 const { getPresignedUrls } = require("../../utils/amazon")
 const { sortObject } = require("../../utils/functions");
+const tmp = require('tmp-promise')
+const fs = require('fs').promises;
+const { spawn } = require("child_process");
 
 /*
 * TODO: Add more error handling
@@ -191,10 +194,40 @@ const editArtworkController = async (req, res, client) => {
   }
 }
 
+const predictArtworkController = async (req, res, client) => {
+  const image = req.file;
+
+  const tmpFile = await tmp.file();
+  await fs.writeFile(tmpFile.path, image.buffer);
+
+  const py = spawn("python", ["api/artwork/predict.py", tmpFile.path]);
+
+  const result = await new Promise((resolve, reject) => {
+    let output;
+
+    py.stdout.on("data", (data) => {
+      output = JSON.parse(data);
+    })
+
+    py.stderr.on("data", (err) => {
+      console.error(`python [Error] ${err}`)
+      reject("Error in predict.py");
+    })
+
+    py.on("exit", (code) => {
+      console.log(`Exited with code ${code}`)
+      resolve(output);
+    })
+  })
+  
+  res.send(result);
+}
+
 module.exports = {
   getAllArtworkByAdminIdController,
   createArtworkController,
   getArtworkByArtIdAdminIdController,
   editArtworkController,
-  deleteArtworkController
+  deleteArtworkController,
+  predictArtworkController
 }
