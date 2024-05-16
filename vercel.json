@@ -1,11 +1,5 @@
 {
   "version": 2,
-  "builds": [
-    {
-      "src": "./index.js",
-      "use": "@vercel/node"
-    }
-  ],
   "routes": [
     {
       "src": "/(.*)",
@@ -13,10 +7,10 @@
     }
   ], 
   "functions": {
-    "api/**/*.js": {
+    "**/*.js": {
       "runtime": "vercel-node@33.4.1"
     },
-    "api/**/*.py": {
+    "**/*.py": {
       "runtime": "vercel-python@3.8"
     }
   }
