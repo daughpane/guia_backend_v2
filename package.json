@@ -17,7 +17,8 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "serve": "nodemon index.js"
+    "serve": "nodemon index.js",
+    "install-all": "npm install && pip install -r requirements.txt"
   },
   "keywords": [],
   "author": "",
