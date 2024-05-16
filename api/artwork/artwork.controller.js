@@ -15,6 +15,7 @@ const {
 const { getPresignedUrls } = require("../../utils/amazon")
 const { sortObject } = require("../../utils/functions");
 const fs = require('fs');
+const { spawn } = require("child_process");
 
 /*
 * TODO: Add more error handling
@@ -193,35 +194,29 @@ const editArtworkController = async (req, res, client) => {
 }
 
 const predictArtworkController = async (req, res, client) => {
-  // const image = new Image("api/artwork/test-picture.jpg");
+  const image = req.file.buffer;
+  console.log("IMAAGE: " + image)
+  const py = spawn("python", ["api/artwork/predict.py", image]);
 
-  // const context = image.getContext('2d');
-        
-  // context.drawImage(videoElement, 0, 0, 224, 224);
-  // const img = image.toDataURL('image/jpeg');
+  const result = await new Promise((resolve, reject) => {
+    let output;
 
-  const myHeaders = new Headers();
-  myHeaders.append("Authorization", "Bearer jbv3mXKaXYSiKBADR6gI4v8qOAseSJYi");
-  myHeaders.append("Content-Type", "multipart/form-data");
-
-  const formdata = new FormData();
-  formdata.append("image", fs.createReadStream('api/artwork/test-picture.jpg'));
-  console.log(formdata)
-  
-  const requestOptions = {
-    method: "POST",
-    headers: myHeaders,
-    body: formdata,
-    redirect: "follow"
-  };
-  fetch("https://guia-endpoint.southeastasia.inference.ml.azure.com/score", requestOptions)
-    .then((response) => response.text())
-    .then((result) => {
-      console.log(result)
-      res.status(200).send("Working so far");
+    py.stdout.on("data", (data) => {
+      output = JSON.parse(data);
     })
-    .catch((error) => console.error(error));
 
+    py.stderr.on("data", (err) => {
+      console.error(`python [Error] ${err}`)
+      reject("Error in predict.py");
+    })
+
+    py.on("exit", (code) => {
+      console.log(`Exited with code ${code}`)
+      resolve(output);
+    })
+  })
+  
+  res.send(result);
 }
 
 module.exports = {
