@@ -7,11 +7,13 @@ url = "https://guia-endpoint.southeastasia.inference.ml.azure.com/score"
 payload={}
 img_file = sys.argv[1]
 
-print("IMG: ", img_file)
+with open(img_file, 'rb') as f:
+  img_data = f.read()
 
 files=[
-  ('image',('file', io.BytesIO(img_file),'application/octet-stream'))
+  ('image',('file', io.BytesIO(img_data),'application/octet-stream'))
 ]
+
 headers = {
   'Authorization': 'Bearer jbv3mXKaXYSiKBADR6gI4v8qOAseSJYi'
 }

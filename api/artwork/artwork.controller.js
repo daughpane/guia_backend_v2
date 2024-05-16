@@ -14,7 +14,8 @@ const {
 } = require("./artwork.service")
 const { getPresignedUrls } = require("../../utils/amazon")
 const { sortObject } = require("../../utils/functions");
-const fs = require('fs');
+const tmp = require('tmp-promise')
+const fs = require('fs').promises;
 const { spawn } = require("child_process");
 
 /*
@@ -194,9 +195,12 @@ const editArtworkController = async (req, res, client) => {
 }
 
 const predictArtworkController = async (req, res, client) => {
-  const image = req.file.buffer;
-  console.log("IMAAGE: " + image)
-  const py = spawn("python", ["api/artwork/predict.py", image]);
+  const image = req.file;
+
+  const tmpFile = await tmp.file();
+  await fs.writeFile(tmpFile.path, image.buffer);
+
+  const py = spawn("python", ["api/artwork/predict.py", tmpFile.path]);
 
   const result = await new Promise((resolve, reject) => {
     let output;
