@@ -15,8 +15,10 @@ const {
 const { getPresignedUrls } = require("../../utils/amazon")
 const { sortObject } = require("../../utils/functions");
 const tmp = require('tmp-promise')
-const fs = require('fs').promises;
+const FormData = require('form-data');
+const fs = require('fs');
 const { spawn } = require("child_process");
+const { default: axios } = require("axios");
 
 /*
 * TODO: Add more error handling
@@ -195,32 +197,27 @@ const editArtworkController = async (req, res, client) => {
 }
 
 const predictArtworkController = async (req, res, client) => {
-  const image = req.file;
+  const url = "https://guia-endpoint.southeastasia.inference.ml.azure.com/score";
+  const key = "jbv3mXKaXYSiKBADR6gI4v8qOAseSJYi";
 
-  const tmpFile = await tmp.file();
-  await fs.writeFile(tmpFile.path, image.buffer);
+  const formdata = new FormData();
+  formdata.append('image', req.file.buffer, {
+    contentType: 'image/jpeg',
+    filename: 'file'
+  });
 
-  const py = spawn("python", ["predict.py", tmpFile.path]);
+  try {
+    const response = await axios.post(url, formdata, {
+      headers: {
+        'Authorization': `Bearer ${key}`,
+        'Content-Type': 'multipart/form-data'
+      }
+    });
 
-  const result = await new Promise((resolve, reject) => {
-    let output;
-
-    py.stdout.on("data", (data) => {
-      output = JSON.parse(data);
-    })
-
-    py.stderr.on("data", (err) => {
-      console.error(`python [Error] ${err}`)
-      reject("Error in predict.py");
-    })
-
-    py.on("exit", (code) => {
-      console.log(`Exited with code ${code}`)
-      resolve(output);
-    })
-  })
-  
-  res.send(result);
+    res.status(200).send(response.data);
+  } catch (err) {
+    res.status(400).send(err);
+  } 
 }
 
 module.exports = {
