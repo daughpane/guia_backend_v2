@@ -197,8 +197,8 @@ const editArtworkController = async (req, res, client) => {
 }
 
 const predictArtworkController = async (req, res, client) => {
-  const url = "https://guia-endpoint.southeastasia.inference.ml.azure.com/score";
-  const key = "jbv3mXKaXYSiKBADR6gI4v8qOAseSJYi";
+  const url = process.env.PREDICT_URL;
+  const key = process.env.PREDICT_KEY;
 
   const formdata = new FormData();
   formdata.append('image', req.file.buffer, {
