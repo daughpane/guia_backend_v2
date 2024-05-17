@@ -1,6 +1,7 @@
 {
   "dependencies": {
     "aws-sdk": "^2.1577.0",
+    "axios": "^1.6.8",
     "cors": "^2.8.5",
     "crypto": "^1.0.1",
     "dotenv": "^16.4.5",
@@ -17,8 +18,7 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "serve": "nodemon index.js",
-    "custom-build": "npm install && pip install requests"
+    "serve": "nodemon index.js"
   },
   "keywords": [],
   "author": "",
